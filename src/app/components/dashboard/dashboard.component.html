@@ -1,0 +1,33 @@
+<div class="container">
+  <div class="button-container">
+    <button mat-flat-button color="warn" (click)="authService.logOut()">Log out</button>
+    <button mat-flat-button color="primary" (click)="goToUserAdverts()">Your adverts</button>
+  </div>
+  <h1>Hi <strong>{{ email }}</strong></h1>
+  <div class="content-container">
+  <mat-card>
+    <mat-card-header>
+      <p>Your current API authentication status: </p>
+    </mat-card-header>
+    <mat-card-content>
+      <p><strong>OLX status: </strong>{{ isOlxAuth ?  'Authenticated' : 'Not authenticated, if you want to post on OLX you need to log in'}}</p>
+      <mat-icon matTooltip="You need to set up an Allegro Business account and an OLX account to use the service">info</mat-icon>
+      <p><strong>Allegro status: </strong>{{ isAllegroAuth ?  'Authenticated' : 'Not authenticated, if you want to post on Allegro you need to log in'}}</p>
+    </mat-card-content>
+  </mat-card>
+  </div>
+  <div *ngIf="!isOlxAuth" class="auth-button olx-auth-button">
+    <a [href]="olxUrl">
+      <button mat-flat-button>
+        <mat-label>OLX auth</mat-label>
+      </button>
+    </a>
+  </div>
+  <div *ngIf="!isAllegroAuth" class="auth-button allegro-auth-button">
+    <a [href]="allegroUrl">
+      <button mat-flat-button>
+        <mat-label>Allegro auth</mat-label>
+      </button>
+    </a>
+  </div>
+</div>

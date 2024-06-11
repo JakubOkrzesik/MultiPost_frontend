@@ -1,0 +1,22 @@
+<div class="button-container">
+  <div class="dashboard-button">
+    <mat-button-toggle (click)="goBack()">Go back to dashboard</mat-button-toggle>
+  </div>
+  <div class="add-advert-button">
+    <button mat-fab (click)="goToAdvertCreation()" color="green" aria-label="Example icon button with a delete icon">
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
+</div>
+
+<div class="advert-list">
+    <mat-card-title>
+      <h1 style="font-weight: bold"> User adverts </h1>
+    </mat-card-title>
+      <mat-card-content>
+        <div class="user_list" *ngFor="let advert of advertsArray">
+          <app-advert-element (notifyParent)="onNotifyParent()" [advert]="advert"></app-advert-element>
+        </div>
+        <h3 *ngIf="!advertsArray || advertsArray.length===0">You don't have any adverts 😔</h3>
+      </mat-card-content>
+</div>

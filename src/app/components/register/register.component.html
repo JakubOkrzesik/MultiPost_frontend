@@ -1,0 +1,33 @@
+<div class="go-back-button">
+  <a href="/"><mat-button-toggle>Go back</mat-button-toggle></a>
+</div>
+<div class="register-container">
+  <form [formGroup]="registerForm" (ngSubmit)="authService.registerSubmit(registerForm.controls['email'].value, registerForm.controls['password'].value)" >
+  <mat-card>
+    <mat-card-header>
+      <h1>Register</h1>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="register-email">
+        <mat-form-field>
+        <mat-label>Email</mat-label>
+        <input matInput placeholder="pat@example.com" type="email" class="register-email" id="register-email" formControlName="email">
+          <mat-error *ngIf="registerForm.controls['email'].errors?.['email'] && !registerForm.controls['email'].errors?.['required']">Please enter a valid email address</mat-error>
+          <mat-error *ngIf="registerForm.controls['email'].errors?.['required']">Email is <strong>required</strong></mat-error>
+        </mat-form-field>
+      </div>
+      <div class="register-password">
+        <mat-form-field>
+        <mat-label>Password</mat-label>
+        <input matInput type="password" class="register-pwd" id="register-pwd" formControlName="password">
+          <mat-error *ngIf="registerForm.controls['password'].errors?.['required']">Password is <strong>required</strong></mat-error>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+    <mat-card-footer>
+      <p>Already have an account? <a href="/login">Login</a></p>
+      <button [disabled]="!registerForm.valid" mat-flat-button color="primary" class="register-btn" type="submit">Submit</button>
+    </mat-card-footer>
+  </mat-card>
+  </form>
+</div>

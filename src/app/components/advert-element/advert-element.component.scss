@@ -1,0 +1,95 @@
+.advert-element {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 500px; /* Added min-width */
+}
+
+mat-card {
+  margin: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease-in-out;
+  width: 50%;
+}
+
+mat-card:hover {
+  transform: scale(1.02);
+}
+
+mat-card-header {
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 16px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+mat-card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+mat-card-content {
+  padding: 16px;
+  font-size: 1rem;
+}
+
+mat-card-content p {
+  margin: 8px 0;
+}
+
+mat-card-content strong {
+  color: #333;
+}
+
+mat-card-actions {
+  padding: 16px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f5f5f5;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+mat-card-footer {
+  padding: 12px;
+  display: flex;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  background-color: #28a745;
+}
+
+mat-card-footer span {
+  font-weight: bold;
+  text-align: center;
+}
+
+a[mat-button] {
+  margin-left: 8px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+a[mat-button]:disabled {
+  color: red;
+}
+
+a[mat-button]:not(:disabled) {
+  color: #007bff;
+}
+
+a[mat-button]:not(:disabled):hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+@media (max-width: 600px) {
+  .advert-element {
+    min-width: 100%; /* Ensures it does not overflow on very small screens */
+  }
+
+  mat-card {
+    width: 90%; /* Adjust the width for smaller screens */
+  }
+}

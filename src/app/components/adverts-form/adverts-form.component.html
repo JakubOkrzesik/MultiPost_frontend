@@ -1,0 +1,59 @@
+<div class="advert-list-button">
+  <mat-button-toggle (click)="goBack()">Go back to advert list</mat-button-toggle>
+</div>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="header-container">
+        <h1 class="text-center mb-4">Advert Creation</h1>
+      </div>
+      <form [formGroup]="sharedForm" (ngSubmit)="onSubmit()">
+        <div class="form-group row justify-content-center" formGroupName="advertToggles">
+          <div class="col-sm-5">
+            <p class="text-center"><mat-slide-toggle formControlName="olxToggle" [disabled]="!sharedForm.get('advertToggles.allegroToggle')?.value">Post using OLX</mat-slide-toggle></p>
+          </div>
+          <div class="col-sm-5">
+            <p class="text-center"><mat-slide-toggle formControlName="allegroToggle" [disabled]="!sharedForm.get('advertToggles.olxToggle')?.value">Post using Allegro</mat-slide-toggle></p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input class="form-control" type="text" (blur)="onTitleBlur()" id="title" formControlName="title">
+          <div class="text-danger" *ngIf="sharedForm.controls['title'].invalid && (sharedForm.controls['title'].touched || sharedForm.controls['title'].dirty)">
+            <span *ngIf="sharedForm.controls['title'].errors?.['required']">This is required</span>
+            <span *ngIf="sharedForm.controls['title'].errors?.['minlength']">The description needs to be at least 16 characters long</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea class="form-control" id="description" rows="3" type="text" formControlName="desc"></textarea>
+          <div class="text-danger" *ngIf="sharedForm.controls['desc'].invalid && (sharedForm.controls['desc'].touched || sharedForm.controls['desc'].dirty)">
+            <span *ngIf="sharedForm.controls['desc'].errors?.['required']">This is required</span>
+            <span *ngIf="sharedForm.controls['desc'].errors?.['minlength']">The description needs to be at least 80 characters long</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="price">Price</label>
+          <input type="number" id="price" class="form-control" formControlName="price">
+          <div class="text-danger" *ngIf="sharedForm.controls['price'].invalid && (sharedForm.controls['price'].touched || sharedForm.controls['price'].dirty)">
+            <span *ngIf="sharedForm.controls['price'].errors?.['required']">This is required</span>
+          </div>
+        </div>
+
+        <app-image-upload (imageEvent)="handleImageEvent($event)" requiredFileType="input/png"></app-image-upload>
+        <div class="olxForms">
+          <app-olx-forms *ngIf="sharedForm.get('advertToggles.olxToggle')?.value" (olxFormDataEvent)="handleOlxFormEvent($event)" [title]="title"></app-olx-forms>
+        </div>
+            <div class="allegroForms" *ngIf="sharedForm.get('advertToggles.allegroToggle')?.value">
+              <mat-card>
+                <mat-card-content>
+                  <h2>Allegro Fields</h2>
+                  <app-allegro-forms (allegroFormDataEvent)="handleAllegroFormEvent($event)"></app-allegro-forms>
+                </mat-card-content>
+              </mat-card>
+            </div>
+        <button [disabled]="submitButtonCheck()" type="submit" class="btn btn-primary" >Submit</button>
+      </form>
+    </div>
+  </div>
+</div>

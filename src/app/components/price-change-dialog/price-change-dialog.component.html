@@ -1,0 +1,12 @@
+<mat-dialog-content>
+  <h2>Do you want to change the price?</h2>
+  <p>Advert name: {{ data.name }}</p>
+  <mat-form-field>
+    <mat-label>New price</mat-label>
+    <input matInput [(ngModel)]="data.price">
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button [mat-dialog-close]="data.price" cdkFocusInitial>Ok</button>
+</mat-dialog-actions>

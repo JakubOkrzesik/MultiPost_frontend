@@ -1,0 +1,32 @@
+.container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+h1 {
+  font-weight: normal;
+  font-size: 4em;
+  margin: 0;
+}
+
+p {
+  font-size: 1em;
+  margin: 10px 0 30px;
+}
+
+.buttons a {
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+button[mat-flat-button] {
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}

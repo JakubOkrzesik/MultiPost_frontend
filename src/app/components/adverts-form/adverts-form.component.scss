@@ -1,0 +1,48 @@
+.container {
+  margin-top: 50px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.text-danger {
+  margin-top: 5px;
+}
+
+.btn-primary {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.advert-list-button {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  align-items: center;
+}
+
+.olxForms,
+.allegroForms {
+  margin-bottom: 20px;
+}
+
+.header-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.advert-list-button {
+  margin-left: 10px;
+}
+
+h1 {
+  font-weight: bold;
+  font-size: 2em;
+  color: #333;
+  text-align: center;
+  margin-top: 20px;
+  letter-spacing: 1.5px;
+}

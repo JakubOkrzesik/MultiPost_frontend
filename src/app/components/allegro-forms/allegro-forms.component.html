@@ -1,0 +1,72 @@
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <form [formGroup]="allegroForm" (ngSubmit)="onSubmit()">
+
+        <div class="form-group" *ngIf="!allegroForm.controls['isGTINActive'].value">
+          <label for="productQuery">Enter your product name (be as descriptive as you want this will not be the title of your listing)</label>
+          <input type="text" id="productQuery" class="form-control" [matTooltip]="conditionalToolTip()" formControlName="productQuery" [readOnly]="isReadOnly">
+
+        <div *ngIf="categoryData.length!==0" class="category-select">
+          <mat-form-field>
+            <mat-label>Choose a category</mat-label>
+            <mat-select formControlName="category">
+              <mat-option *ngFor="let category of categoryData" [value]="category.id">{{ category.name }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div *ngIf="productArray.length!==0" class="product-select">
+          <mat-form-field>
+            <mat-label>Choose a product</mat-label>
+            <mat-select formControlName="productId">
+              <mat-option *ngFor="let product of productArray" [value]="product.id">{{ product.name }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        </div>
+
+        <div class="form-group text-center" *ngIf="allegroForm.controls['isGTINActive'].value">
+          <label for="GTIN">Enter your product's GTIN number</label>
+          <input type="number" id="GTIN" class="form-control" formControlName="GTIN" [matTooltip]="conditionalToolTip()" [readOnly]="isReadOnly">
+        </div>
+
+        <div *ngIf="missingParams.length!==0" formGroupName="paramForms">
+          <mat-card>
+            <mat-card-content>
+              <h3>Allegro param forms</h3>
+              <div *ngFor="let field of missingParams" class="form-group">
+                <mat-form-field>
+                  <mat-label>{{ field.name }}</mat-label>
+                  <ng-container [ngSwitch]="field.type" >
+                  <mat-select *ngSwitchCase="'dictionary'" [formControlName]="field.id" [multiple]="field.multipleChoices">
+                    <mat-option *ngFor="let value of field.dictionary" [value]="value.id" >{{ value.value }}</mat-option>
+                  </mat-select>
+                  <input matInput *ngSwitchCase="'float'" type="number" [formControlName]="field.id" class="form-control">
+                  <input matInput *ngSwitchCase="'integer'" type="number" [formControlName]="field.id" class="form-control">
+                  <input matInput *ngSwitchCase="'string'" type="text" [formControlName]="field.id" class="form-control">
+                  </ng-container>
+                </mat-form-field>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <div class="text-center">
+          <p><mat-checkbox (click)="resetFormState()" formControlName="isGTINActive">Search using GTIN number</mat-checkbox></p>
+        </div>
+
+        <div *ngIf="productName" class="product-edit">
+          <p>Your product name: {{ productName }}</p>
+          <button mat-raised-button matTooltip="Choose a different product or enter your product details differently" (click)="resetFormState()">Edit</button>
+        </div>
+
+        <div class="text-center">
+          <button [disabled]="productName"  type="submit" class="btn btn-primary">Select product</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,60 @@
+{
+  "name": "name",
+  "platforms": ["OLX", "Allegro"],
+  "olxData": {
+    "title": "title",
+    "description": "desc",
+    "categoryId": "OLX category ID",
+    "location": {
+      "latitude": "lat",
+      "longitude": "lon"
+    },
+    "advertiserType": "private",
+    "contact": {
+      "name": "name",
+      "phone": "phonenumber"
+    },
+    "images": [
+      "img",
+      "img1"
+    ],
+    "price": {
+      "value": 0,
+      "negotiable": true
+    },
+    "attributes": {
+      "attribute1": "value1",
+      "attribute2": "value2"
+    }
+  },
+  "allegroData": {
+    "title": "title",
+    "description": "",
+    "productSet": [
+      {
+        "product": {
+          "id": "Allegro product ID",
+          "images": [
+            "https://merkandi.pl/download/849570/img-6138.jpg",
+            "https://img.merkandi.com/imgcache/resized/images/offer/2020/04/06//0ca7bbce-ab2c-4601-bf81-5665d91ec556-1586163450.jpg"
+          ],
+          "parameters": [
+            {
+              "name": "name",
+              "values": ["value"]
+            }
+          ]
+        }
+      }
+    ],
+    "sellingMode": {
+      "price": {
+        "amount": "amount",
+        "currency": "PLN"
+      }
+    },
+    "stock": {
+      "available": 1
+    }
+  }
+}

@@ -1,0 +1,36 @@
+<form [formGroup]="olxForms">
+  <mat-card>
+    <mat-card-content>
+      <mat-card-title>
+        <h2>Olx Fields</h2>
+      </mat-card-title>
+      <p>Enter advert title to reveal mandatory OLX fields</p>
+      <div class="form-group">
+        <label for="name">Name of seller</label>
+        <input matInput type="text" id="name" class="form-control" formControlName="name">
+        <div class="text-danger" *ngIf="olxForms.controls['name'].invalid && (olxForms.controls['name'].touched || olxForms.controls['name'].dirty)">
+          <span *ngIf="olxForms.controls['name'].errors?.['required']">This is required</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone number</label>
+        <input matInput type="number" id="phone" class="form-control" formControlName="phone">
+        <div class="text-danger" *ngIf="olxForms.controls['phone'].invalid && (olxForms.controls['phone'].touched || olxForms.controls['phone'].dirty)">
+          <span *ngIf="olxForms.controls['phone'].errors?.['required']">This is required</span>
+          <span *ngIf="olxForms.controls['phone'].errors?.['lengthError']">Provide a valid telephone number</span>
+        </div>
+      </div>
+      <app-location-form (locationEvent)="handleLocationEvent($event)"></app-location-form>
+      <div formGroupName="generatedControls">
+      <div *ngFor="let field of formFields" class="form-group">
+        <mat-label>{{ field.label }}</mat-label>
+        <mat-select *ngIf="field.values.length > 0" [formControlName]="field.code" class="form-control">
+          <mat-option *ngFor="let value of field.values" [value]="value.code">{{ value.label }}</mat-option>
+        </mat-select>
+        <input matInput *ngIf="field.values.length === 0 && field.validation.numeric" type="number" [formControlName]="field.code" class="form-control">
+        <input matInput *ngIf="field.values.length === 0 && !field.validation.numeric" type="text" [formControlName]="field.code" class="form-control">
+      </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</form>
