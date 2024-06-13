@@ -12,7 +12,7 @@ import {OlxService} from "../../services/olx.service";
 })
 export class OlxAuthCallbackComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router, private olxService: OlxService) {}
-
+  // needs altering no error handling
   ngOnInit(): void {
   this.route.queryParams.subscribe(params => {
     const code = params['code'];

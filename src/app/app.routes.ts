@@ -9,6 +9,7 @@ import {OlxAuthCallbackComponent} from "./components/olx-auth-callback/olx-auth-
 import {AllegroAuthCallbackComponent} from "./components/allegro-auth-callback/allegro-auth-callback.component";
 import {UserAdvertsListComponent} from "./components/user-adverts-list/user-adverts-list.component";
 import {redirectLoginGuard} from "./guards/redirect-login.guard";
+import {AllegroFormsComponent} from "./components/allegro-forms/allegro-forms.component";
 
 export const routes: Routes = [
   {path: '', component: StartScreenComponent, canActivate: [redirectLoginGuard]},
@@ -18,5 +19,6 @@ export const routes: Routes = [
   {path: 'form', component: AdvertsFormComponent, canActivate: [IsLoginGuard]},
   {path: 'olx-auth-callback', component: OlxAuthCallbackComponent, canActivate: [IsLoginGuard]},
   {path: 'allegro-auth-callback', component: AllegroAuthCallbackComponent, canActivate: [IsLoginGuard]},
-  {path: 'userAdverts', component: UserAdvertsListComponent, canActivate: [IsLoginGuard]}
+  {path: 'userAdverts', component: UserAdvertsListComponent, canActivate: [IsLoginGuard]},
+  {path: 'allegroTest', component: AllegroFormsComponent, canActivate: [IsLoginGuard]}
 ];

@@ -24,6 +24,7 @@ export class AuthService {
         this.router.navigate(["/dashboard"]);// logged in popup
       }
       else {
+        this._snackBar.open("An error occurred while trying to log in", "Ok")
         console.log("Token not saved");
       }
       }
@@ -35,8 +36,8 @@ export class AuthService {
     this.http.post<any>(`${this.baseUrl}/auth/register`, formData, { observe: "body", responseType: "json" }).subscribe(response =>
       // Communicado using the response's message
       {
+        this._snackBar.open(response.message, "Ok")
         if (response.status===200) {
-          this._snackBar.open(response.message, "Ok")
           this.router.navigate(["/login"]);
         }
       }

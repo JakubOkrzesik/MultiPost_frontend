@@ -44,6 +44,8 @@ export class DashboardComponent implements OnInit {
       this.email = userData.email
       this.isOlxAuth = userData.isOLXAuth
       this.isAllegroAuth = userData.isAllegroAuth
+      localStorage.setItem("olxAuth", String(this.isOlxAuth));
+      localStorage.setItem("allegroAuth", String(this.isAllegroAuth));
     })
   }
 

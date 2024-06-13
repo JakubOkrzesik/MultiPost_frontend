@@ -32,7 +32,7 @@
           <input type="number" id="GTIN" class="form-control" formControlName="GTIN" [matTooltip]="conditionalToolTip()" [readOnly]="isReadOnly">
         </div>
 
-        <div *ngIf="missingParams.length!==0" formGroupName="paramForms">
+        <div class="generated-form-group" *ngIf="missingParams.length!==0" formGroupName="paramForms">
           <mat-card>
             <mat-card-content>
               <h3>Allegro param forms</h3>

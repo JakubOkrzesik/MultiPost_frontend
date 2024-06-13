@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -27,7 +27,7 @@ import {Image} from "../../models/Image";
   templateUrl: './adverts-form.component.html',
   styleUrl: './adverts-form.component.scss'
 })
-export class AdvertsFormComponent {
+export class AdvertsFormComponent implements OnInit {
 
   public sharedForm: FormGroup;
   public allegroData: any;
@@ -42,10 +42,23 @@ export class AdvertsFormComponent {
       desc: new FormControl('', [Validators.required, Validators.minLength(80), Validators.maxLength(9000)]),
       price: new FormControl('', [Validators.required]),
       advertToggles: new FormGroup({
-        olxToggle: new FormControl({value: true, disabled:true}),
+        olxToggle: new FormControl(true),
         allegroToggle: new FormControl(false)
       })
     })
+  }
+
+  ngOnInit(): void {
+    // checks the API authentication status
+    const olxAuth = localStorage.getItem("olxAuth") === "true";
+    const allegroAuth = localStorage.getItem("allegroAuth") === "true";
+
+    if (!olxAuth || !allegroAuth) {
+      this.router.navigate(['dashboard']);
+      this._snackBar.open("You need to be authenticated on both services to use this feature", "Ok");
+      return;
+    }
+
   }
 
 

@@ -1,10 +1,10 @@
-import {Component, EventEmitter, OnDestroy, Output} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {MatCheckbox} from "@angular/material/checkbox";
 import {CommonModule, NgIf} from "@angular/common";
 import {MatButton} from "@angular/material/button";
 import {MatTooltip} from "@angular/material/tooltip";
-import {MatFormField, MatLabel, MatOption, MatSelect} from "@angular/material/select";
+import {MatError, MatFormField, MatLabel, MatOption, MatSelect} from "@angular/material/select";
 import {AllegroService} from "../../services/allegro.service";
 import {MatCard, MatCardContent} from "@angular/material/card";
 import {Subscription} from "rxjs";
@@ -28,56 +28,93 @@ import {NgxMatSelectSearchModule} from "ngx-mat-select-search";
     MatCard,
     MatCardContent,
     MatInput,
-    NgxMatSelectSearchModule
+    NgxMatSelectSearchModule,
+    MatError
   ],
   templateUrl: './allegro-forms.component.html',
   styleUrl: './allegro-forms.component.scss'
 })
-export class AllegroFormsComponent implements OnDestroy {
+export class AllegroFormsComponent implements OnDestroy, OnInit {
   // need to set up better handling of subscriptions
 
   @Output() allegroFormDataEvent = new EventEmitter<any>();
 
   allegroForm: FormGroup;
   isReadOnly: boolean = false;
-  productId: string = '';
   productName: string = '';
   categoryData: any[] = [];
   productArray: any[] = [];
-  private categoryId: any;
   private requiredParamsArray: any[] = [];
   private productParameters: any[] = [];
   allegroParamForm: FormGroup = new FormGroup({});
   missingParams: any[] = [];
-  private subscriptions: Subscription[] = [];
+  private paramSubscriptions: Subscription[] = [];
   private missingParamsMap!: Map<any, any>;
 
   constructor(private allegroService: AllegroService) {
     this.allegroForm = new FormGroup({
       productQuery: new FormControl(''),
       GTIN: new FormControl('', [Validators.minLength(12), Validators.maxLength(12)]),
-      category: new FormControl(''),
-      productId: new FormControl(''),
+      category: new FormControl('', [Validators.required]),
+      productId: new FormControl('', [Validators.required]),
       isGTINActive: new FormControl(false),
       paramForms: new FormGroup({})
     })
   }
 
+  ngOnInit(): void {
+    // setup subscriptions for categoryID, productID and form validation
+    this.setupCategoryIDSubscription();
+    this.setupProductIDSubscription();
+    this.setupFormValidationSubscription();
+  }
+
+  private setupCategoryIDSubscription() {
+    this.allegroForm.get('category')?.valueChanges.subscribe(categoryId => {
+      if (!this.allegroForm.controls['isGTINActive'].value) {
+        this.deleteParamSubscriptions();
+        this.productParameters = [];
+        this.missingParams = [];
+        this.allegroForm.setControl('paramForms', new FormGroup({temp: new FormControl('', [Validators.required])}));
+        // in order to ensure that the correct param forms are displayed also that the form stays invalid will have to do for now
+        this.allegroService.allegroQuerySearch( this.allegroForm.get('productQuery')?.value, categoryId).subscribe(response => {
+          // products labeled as "LISTED" do not require further approval from allegro and can be immediately posted
+          this.productArray = response.products.filter((product: any) => product.publication.status==="LISTED");
+        })
+      }
+    })
+  }
+
+  private setupProductIDSubscription() {
+    this.allegroForm.controls['productId']?.valueChanges.subscribe(result => {
+      console.log("product value changed")
+      if (!this.allegroForm.controls['isGTINActive'].value) {
+        this.deleteParamSubscriptions();
+        const productIdSubscription = this.allegroService.getAllegroProductbyID(result).subscribe(productData => {
+          this.productParameters = productData.parameters;
+          this.generateParamForms();
+        })
+        this.paramSubscriptions.push(productIdSubscription);
+      }
+    })
+  }
+
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.deleteParamSubscriptions();
   }
 
   private searchProductByGTIN() {
     // searches product by GTIN number and generates forms according to the productId
-    this.allegroService.allegroGtinSearch(this.allegroForm.controls['GTIN'].value).subscribe(response => {
+    const gtinValue = this.allegroForm.controls['GTIN'].value;
+    this.allegroService.allegroGtinSearch(gtinValue).subscribe(response => {
       const product = response.products[0]
-      this.productId = product.id;
-      this.categoryId = product.category.id;
+      this.allegroForm.controls['productId'].setValue(product.id)
+      this.allegroForm.controls['category'].setValue(product.category.id)
       this.productName = product.name;
       // makes the GTIN form disabled - user needs to press the edit button to edit the GTIN number
       this.isReadOnly = true;
-      this.productParameters = response.parameters;
+      this.productParameters = product.parameters;
       this.generateParamForms()
     });
   }
@@ -89,51 +126,27 @@ export class AllegroFormsComponent implements OnDestroy {
       this.productName = productQuery;
       this.isReadOnly = true;
       this.categoryData = response.matchingCategories;
-      // produces an array of matching categories
-      // waiting for the user to select a category
-      this.watchCategoryID()
-      // waiting for the user to select a product
-      this.allegroForm.get('productId')?.valueChanges.subscribe(productID => {
-        this.productId = productID;
-        // getting product's details
-        this.generateParamForms();
-      })
     })
   }
 
-  private watchCategoryID() {
-    this.allegroForm.get('category')?.valueChanges.subscribe(categoryId => {
-      this.categoryId = categoryId
-      this.productParameters = [];
-      this.missingParams = [];
-      this.allegroForm.setControl('paramForms', new FormGroup({temp: new FormControl('', [Validators.required])}));
-      // in order to ensure that the correct param forms are displayed also that the form stays invalid will have to do for now
-      this.allegroService.allegroQuerySearch( this.allegroForm.get('productQuery')?.value, this.categoryId).subscribe(response => {
-        // products labeled as "LISTED" do not require further approval from allegro and can be immediately posted
-        this.productArray = response.products.filter((product: any) => product.publication.status==="LISTED");
-      })
-    })
-  }
+
 
   private generateParamForms() {
-    this.allegroService.getAllegroProductbyID(this.productId).subscribe(response => {
-      this.productParameters = response.parameters;
-      // in order to get only the required params the product params need to be compared to the required category params
-      // getting category params
-      this.allegroService.getAllegroCategoryParams(this.categoryId).subscribe(response => {
+      const categoryId = this.allegroForm.get('category')?.value
+      const allegroCategorySubscription = this.allegroService.getAllegroCategoryParams(categoryId).subscribe(response => {
         // searching for only the required parameters
         this.requiredParamsArray = response.parameters.filter((param: any) => param.required);
+        // comparing the product params to category params and selecting the ones that are missing
         const [formGroup, missingParams, missingParamsMap] = this.allegroService.getAllegroMissingParams(this.requiredParamsArray, this.productParameters);
         this.allegroParamForm = formGroup;
         this.allegroForm.setControl('paramForms', this.allegroParamForm);
         this.missingParams = missingParams;
-        console.log(this.missingParams)
         this.missingParamsMap = missingParamsMap
         // copy of the original values because if the dictionary belongs to a child component it will be getting updated
         this.missingParams.forEach(field => field.originalDictionary = field.dictionary);
         this.setupParamFormSubscriptions();
       })
-    })
+    this.paramSubscriptions.push(allegroCategorySubscription);
   }
 
   private setupParamFormSubscriptions() {
@@ -144,23 +157,24 @@ export class AllegroFormsComponent implements OnDestroy {
           field.dictionary = this.updateDependentOptions(field, parentIdValue);
         });
         if (subscription) {
-          this.subscriptions.push(subscription);
+          this.paramSubscriptions.push(subscription);
         }
       }
     });
+  }
 
-    // emitting the data to the main form component if the form is valid
-    let allegroFormSubscription = this.allegroForm.statusChanges.subscribe((response) => {
+  private setupFormValidationSubscription() {
+    this.allegroForm.statusChanges.subscribe((response) => {
       if (response==="VALID") {
         const productParameters: any[] = []
         const offerParameters: any[] = []
-        Object.keys(this.allegroParamForm.controls).forEach((id) => {
+        Object.keys((this.allegroForm.get('paramForms') as FormGroup).controls).forEach((id) => {
           let entry;
           // need to add support for range values
           if (this.missingParamsMap.get(id).type=="dictionary") {
             entry = {
               id: id,
-              valuesIds: [this.allegroParamForm.controls[id].value],
+              valuesIds: [this.allegroForm.get('paramForms')?.get(id)?.value],
               values: [],
               rangeValue: null
             }
@@ -168,7 +182,7 @@ export class AllegroFormsComponent implements OnDestroy {
             entry = {
               id: id,
               valuesIds: [],
-              values: [this.allegroParamForm.controls[id].value],
+              values: [this.allegroForm.get('paramForms')?.get(id)?.value],
               rangeValue: null
             };
           }
@@ -180,34 +194,28 @@ export class AllegroFormsComponent implements OnDestroy {
           }
         })
         const allegroFormsData = {
-          id: this.productId,
+          id: this.allegroForm.get('productId')?.value,
           productParameters: productParameters,
           offerParameters: offerParameters
         }
-        console.log(allegroFormsData)
+        console.log("VALID DATA EMITTED")
         this.allegroFormDataEvent.emit(allegroFormsData)
+        console.log(allegroFormsData)
       } else {
         this.allegroFormDataEvent.emit(null)
-        console.log("data emitted")
+        console.log("INVALID DATA - EMITTING NULL VALUE")
       }
     });
-
-    this.subscriptions.push(allegroFormSubscription);
   }
 
   // attached to the edit button resets the form
   resetFormState() {
-    this.productId = '';
     this.productName = '';
     this.isReadOnly = false;
     this.categoryData = [];
     this.productArray = [];
     this.missingParams = [];
-    this.categoryId = '';
     this.ngOnDestroy();
-    // temporary solution needs an overhaul
-    this.allegroFormDataEvent.emit(null)
-    console.log("data emitted")
   }
 
   // is responsible for updating data of the dependent form options - some form entries are dependent on parent value for example Manufacturer - Apple, product - Iphone 12
@@ -222,7 +230,19 @@ export class AllegroFormsComponent implements OnDestroy {
     );
   }
 
+  conditionalToolTip(): string {
+    if (this.productName) {
+      if (!this.allegroForm.controls['isGTINActive'].value) {
+        return "To edit the product query press the edit button";
+      }
+      return "To edit the GTIN number press the edit button";
+    }
+    return '';
+  }
 
+  private deleteParamSubscriptions() {
+    this.paramSubscriptions.forEach(subscription => subscription.unsubscribe());
+  }
 
   onSubmit() {
     const isGTINActive = this.allegroForm.controls['isGTINActive'].value
@@ -234,13 +254,5 @@ export class AllegroFormsComponent implements OnDestroy {
     }
   }
 
-  conditionalToolTip(): string {
-    if (this.productName) {
-      if (!this.allegroForm.controls['isGTINActive'].value) {
-        return "To edit the product query press the edit button";
-      }
-      return "To edit the GTIN number press the edit button";
-    }
-    return '';
-  }
+
 }

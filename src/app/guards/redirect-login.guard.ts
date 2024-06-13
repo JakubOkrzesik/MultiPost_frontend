@@ -15,7 +15,7 @@ class RedirectLoginGuard {
     }
     return true;
   }
-
+  // circular dependency needs fixing
   private isJWTExpired(): boolean {
     const decodedJwt = jwtDecode(localStorage.getItem("jwtToken")!).exp;
     if (decodedJwt) {
