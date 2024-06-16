@@ -19,6 +19,5 @@ export const routes: Routes = [
   {path: 'form', component: AdvertsFormComponent, canActivate: [IsLoginGuard]},
   {path: 'olx-auth-callback', component: OlxAuthCallbackComponent, canActivate: [IsLoginGuard]},
   {path: 'allegro-auth-callback', component: AllegroAuthCallbackComponent, canActivate: [IsLoginGuard]},
-  {path: 'userAdverts', component: UserAdvertsListComponent, canActivate: [IsLoginGuard]},
-  {path: 'allegroTest', component: AllegroFormsComponent, canActivate: [IsLoginGuard]}
+  {path: 'user-adverts', component: UserAdvertsListComponent, canActivate: [IsLoginGuard]}
 ];

@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {NgForOf} from "@angular/common";
-import {MatCard, MatCardContent, MatCardHeader} from "@angular/material/card";
+import {MatCard, MatCardContent, MatCardFooter, MatCardHeader} from "@angular/material/card";
 import {MatLabel} from "@angular/material/form-field";
 import {MatList, MatListItem, MatListItemIcon, MatListItemLine, MatListItemTitle} from "@angular/material/list";
 import {MatIcon} from "@angular/material/icon";
@@ -20,7 +20,8 @@ import {MatIcon} from "@angular/material/icon";
     MatIcon,
     MatListItemLine,
     MatListItemTitle,
-    MatListItemIcon
+    MatListItemIcon,
+    MatCardFooter
   ],
   templateUrl: './image-upload.component.html',
   styleUrl: './image-upload.component.scss'

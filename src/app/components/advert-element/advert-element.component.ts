@@ -67,22 +67,34 @@ export class AdvertElementComponent implements OnInit{
 
   openPriceDialog(): void {
     const dialogRef = this.dialog.open(PriceChangeDialogComponent, {
-      data: {price: this.advert.price},
+      data: { price: this.advert.price },
+    });
+
+    dialogRef.backdropClick().subscribe(() => {
+      dialogRef.close({ noAction: true }); // pass a result to close
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      console.log(result)
-      this.submitPrice(this.advert.id, result)
+      console.log(result);
+      if (result && !result.noAction) { // handle the case when the dialog is closed by user action
+        this.submitPrice(this.advert.id, result);
+      }
     });
   }
 
   openDeleteDialog() {
     const dialogRef = this.dialog.open(DeleteDialogComponent);
 
+    dialogRef.backdropClick().subscribe(() => {
+      dialogRef.close({ noAction: true }); // pass a result to close
+    });
+
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
       console.log(result);
-      this.submitDelete(this.advert.id);
+      if (result && !result.noAction) { // handle the case when the dialog is closed by user action
+        this.submitDelete(this.advert.id);
+      }
     });
   }
 

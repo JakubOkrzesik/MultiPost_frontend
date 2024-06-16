@@ -7,18 +7,18 @@
     <p><strong>OLX State:</strong> {{ advert.olxState ?  advert.olxState : 'Advert not posted on OLX'}}</p>
     <p><strong>Allegro State:</strong> {{ advert.allegroState ? advert.allegroState : 'Advert not posted on Allegro' }}</p>
     <p><strong>Current price:</strong> {{ advert.price }}</p>
-    <div *ngIf="conflictCheck(advert) && advert.soldOn=='NONE'" class="text-danger">
-      <p>Potential conflict</p>
-    </div>
   </mat-card-content>
   <mat-card-actions>
-    <a mat-button [disabled]="advert.soldOn!='NONE'" (click)="openPriceDialog()">Change current price</a>
+    <a mat-button [hidden]="advert.soldOn!='NONE' || (conflictCheck(advert) && advert.soldOn=='NONE')"  (click)="openPriceDialog()">Change current price</a>
     <a mat-button (click)="openDeleteDialog()">Delete advert</a>
     <a mat-button (click)="getOlxUrl(advert.olxId)" [hidden]="!advert.olxId" target="_blank">View on OLX</a>
     <a mat-button (click)="getAllegroUrl(advert.allegroId)" [hidden]="!advert.allegroId" target="_blank">View on Allegro</a>
   </mat-card-actions>
-  <mat-card-footer *ngIf="advert.soldOn!=='NONE'">
+  <mat-card-footer class="sold-on-footer" *ngIf="advert.soldOn!=='NONE'">
       <span>Sold on {{ advert.soldOn=='OLX' ? 'OLX' : 'Allegro'}}</span>
+  </mat-card-footer>
+  <mat-card-footer class="conflict-footer" *ngIf="conflictCheck(advert) && advert.soldOn=='NONE'">
+    <span>Product sold on both platforms. Conflict needs resolving.</span>
   </mat-card-footer>
 </mat-card>
 </div>

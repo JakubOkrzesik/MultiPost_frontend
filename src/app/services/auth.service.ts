@@ -16,23 +16,21 @@ export class AuthService {
 
   loginSubmit(email: string, password: string): void {
     const formData = { email, password };
-    this.http.post<{token: string}>(`${this.baseUrl}/auth/authenticate`, formData, { observe: "body", responseType: "json" }).subscribe(response => {
-      console.log(response);
+    this.http.post<any>(`${this.baseUrl}/auth/authenticate`, formData, { observe: "body", responseType: "json" }).subscribe(response => {
       if (response.token) {
         localStorage.setItem("jwtToken", response.token);
         this._snackBar.open("Login successful", "Ok")
         this.router.navigate(["/dashboard"]);// logged in popup
       }
       else {
-        this._snackBar.open("An error occurred while trying to log in", "Ok")
-        console.log("Token not saved");
+        this._snackBar.open(response.message, "Ok")
       }
       }
     );
   }
 
-  registerSubmit(email: string, password: string) {
-    const formData = { email, password }
+  registerSubmit(email: string, password: string, firstname: string, lastname: string) {
+    const formData = { email, password, firstname, lastname }
     this.http.post<any>(`${this.baseUrl}/auth/register`, formData, { observe: "body", responseType: "json" }).subscribe(response =>
       // Communicado using the response's message
       {

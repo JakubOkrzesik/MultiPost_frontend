@@ -46,9 +46,8 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
   productArray: any[] = [];
   private requiredParamsArray: any[] = [];
   private productParameters: any[] = [];
-  allegroParamForm: FormGroup = new FormGroup({});
   missingParams: any[] = [];
-  private paramSubscriptions: Subscription[] = [];
+  private subscriptions: Subscription[] = [];
   private missingParamsMap!: Map<any, any>;
 
   constructor(private allegroService: AllegroService) {
@@ -71,8 +70,8 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
 
   private setupCategoryIDSubscription() {
     this.allegroForm.get('category')?.valueChanges.subscribe(categoryId => {
-      if (!this.allegroForm.controls['isGTINActive'].value) {
-        this.deleteParamSubscriptions();
+      if (!this.allegroForm.controls['isGTINActive'].value && categoryId!='') {
+        this.deleteSubscriptions();
         this.productParameters = [];
         this.missingParams = [];
         this.allegroForm.setControl('paramForms', new FormGroup({temp: new FormControl('', [Validators.required])}));
@@ -88,20 +87,20 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
   private setupProductIDSubscription() {
     this.allegroForm.controls['productId']?.valueChanges.subscribe(result => {
       console.log("product value changed")
-      if (!this.allegroForm.controls['isGTINActive'].value) {
-        this.deleteParamSubscriptions();
+      if (!this.allegroForm.controls['isGTINActive'].value && result!='') {
+        this.deleteSubscriptions();
         const productIdSubscription = this.allegroService.getAllegroProductbyID(result).subscribe(productData => {
           this.productParameters = productData.parameters;
           this.generateParamForms();
         })
-        this.paramSubscriptions.push(productIdSubscription);
+        this.subscriptions.push(productIdSubscription);
       }
     })
   }
 
 
   ngOnDestroy(): void {
-    this.deleteParamSubscriptions();
+    this.deleteSubscriptions();
   }
 
   private searchProductByGTIN() {
@@ -138,26 +137,25 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
         this.requiredParamsArray = response.parameters.filter((param: any) => param.required);
         // comparing the product params to category params and selecting the ones that are missing
         const [formGroup, missingParams, missingParamsMap] = this.allegroService.getAllegroMissingParams(this.requiredParamsArray, this.productParameters);
-        this.allegroParamForm = formGroup;
-        this.allegroForm.setControl('paramForms', this.allegroParamForm);
+        this.allegroForm.setControl('paramForms', formGroup);
         this.missingParams = missingParams;
         this.missingParamsMap = missingParamsMap
         // copy of the original values because if the dictionary belongs to a child component it will be getting updated
         this.missingParams.forEach(field => field.originalDictionary = field.dictionary);
         this.setupParamFormSubscriptions();
       })
-    this.paramSubscriptions.push(allegroCategorySubscription);
+    this.subscriptions.push(allegroCategorySubscription);
   }
 
   private setupParamFormSubscriptions() {
     this.missingParams.forEach(field => {
       const parentId = field.options.dependsOnParameterId;
       if (parentId) {
-        const subscription = this.allegroParamForm.get(parentId)?.valueChanges.subscribe(parentIdValue => {
+        const subscription = this.allegroForm.get('paramForms')?.get(parentId)?.valueChanges.subscribe(parentIdValue => {
           field.dictionary = this.updateDependentOptions(field, parentIdValue);
         });
         if (subscription) {
-          this.paramSubscriptions.push(subscription);
+          this.subscriptions.push(subscription);
         }
       }
     });
@@ -216,6 +214,12 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
     this.productArray = [];
     this.missingParams = [];
     this.ngOnDestroy();
+    this.allegroForm.reset({
+      category: '',
+      productId: '',
+      paramForms: {}
+    });
+    console.log(this.allegroForm);
   }
 
   // is responsible for updating data of the dependent form options - some form entries are dependent on parent value for example Manufacturer - Apple, product - Iphone 12
@@ -240,8 +244,8 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
     return '';
   }
 
-  private deleteParamSubscriptions() {
-    this.paramSubscriptions.forEach(subscription => subscription.unsubscribe());
+  private deleteSubscriptions() {
+    this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 
   onSubmit() {

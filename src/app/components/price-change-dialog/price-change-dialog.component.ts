@@ -37,6 +37,6 @@ interface PriceData {
 export class PriceChangeDialogComponent {
   constructor(public dialogRef: MatDialogRef<PriceChangeDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: PriceData) {}
   onNoClick(): void {
-    this.dialogRef.close();
+    this.dialogRef.close({noAction: true});
   }
 }

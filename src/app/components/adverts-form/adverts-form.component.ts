@@ -41,8 +41,9 @@ export class AdvertsFormComponent implements OnInit {
       title: new FormControl('', [Validators.required, Validators.minLength(16), Validators.maxLength(70)]),
       desc: new FormControl('', [Validators.required, Validators.minLength(80), Validators.maxLength(9000)]),
       price: new FormControl('', [Validators.required]),
+      imageUrls: new FormControl([], [Validators.required]),
       advertToggles: new FormGroup({
-        olxToggle: new FormControl(true),
+        olxToggle: new FormControl({value: true, disabled: true}),
         allegroToggle: new FormControl(false)
       })
     })
@@ -73,11 +74,12 @@ export class AdvertsFormComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['userAdverts'])
+    this.router.navigate(['user-adverts'])
   }
 
   handleImageEvent($event: string) {
     this.imageUrls.push($event)
+    this.sharedForm.get('imageUrls')?.setValue(this.imageUrls)
   }
 
   handleAllegroFormEvent($event: any) {
@@ -166,18 +168,26 @@ export class AdvertsFormComponent implements OnInit {
   onSubmit() {
       this.collectFormValues().subscribe(advert => {
         console.log(advert)
-        this.advertService.postAdvert(advert).subscribe(response => {
-          console.log(response);
-          if (response.status===200) {
-            this.openSnackBar(response.message)
-            this.router.navigate(['userAdverts'])
+        /*this.advertService.postAdvert(advert).subscribe({
+          next: (response) => {
+            if (response.status===200) {
+              this.openSnackBar(response.message);
+              this.router.navigate(['user-adverts'])
+            }
+          },
+          error: (error) => {
+            console.log(error);
+            this.openSnackBar("Error while posting advert. Fill out your forms once again");
+            this.reloadComponent();
           }
-          else {
-            this.openSnackBar(response)
-            this.router.navigate(['userAdverts'])
-          }
-        });
-      })
+      })*/})
+  }
+
+  private reloadComponent() {
+    // Assuming you are on the path '/allegro-forms'
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate(['/form']);
+    });
   }
 
   submitButtonCheck() {

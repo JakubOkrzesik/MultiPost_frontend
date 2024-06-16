@@ -4,7 +4,7 @@
       <p>Image upload</p>
     </mat-card-header>
     <mat-card-content>
-      <input type="file" class="file-input" id="actual-btn" (change)="uploadImage($event)">
+      <input type="file" accept="image/jpeg" class="file-input" id="actual-btn" (change)="uploadImage($event)">
         <label class="btn btn-primary" for="actual-btn">Choose File</label>
       <mat-list *ngFor="let fileName of fileArray; let i = index" [attr.data-index]="i">
         <mat-list-item>
@@ -14,5 +14,8 @@
         </mat-list-item>
       </mat-list>
     </mat-card-content>
+    <mat-card-footer>
+      <p>Note: You are required to add <strong>at least one image</strong> in jpg format</p>
+    </mat-card-footer>
   </mat-card>
 </div>
