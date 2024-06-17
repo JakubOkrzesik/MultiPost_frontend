@@ -168,7 +168,7 @@ export class AdvertsFormComponent implements OnInit {
   onSubmit() {
       this.collectFormValues().subscribe(advert => {
         console.log(advert)
-        /*this.advertService.postAdvert(advert).subscribe({
+        this.advertService.postAdvert(advert).subscribe({
           next: (response) => {
             if (response.status===200) {
               this.openSnackBar(response.message);
@@ -180,7 +180,7 @@ export class AdvertsFormComponent implements OnInit {
             this.openSnackBar("Error while posting advert. Fill out your forms once again");
             this.reloadComponent();
           }
-      })*/})
+      })})
   }
 
   private reloadComponent() {
