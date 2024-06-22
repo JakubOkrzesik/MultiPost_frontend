@@ -47,6 +47,8 @@
                   <input matInput *ngSwitchCase="'integer'" type="number" [formControlName]="field.id" class="form-control">
                   <input matInput *ngSwitchCase="'string'" type="text" [formControlName]="field.id" class="form-control">
                   </ng-container>
+                  <mat-error *ngIf="formRequirementCheck(field.id)">This form is <strong>required</strong></mat-error>
+                  <mat-error></mat-error>
                 </mat-form-field>
               </div>
             </mat-card-content>

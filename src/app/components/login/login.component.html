@@ -3,7 +3,7 @@
 </div>
 <div class="login-container">
   <form [formGroup]="loginForm" (ngSubmit)="authService.loginSubmit(loginForm.controls['email'].value, loginForm.controls['password'].value)">
-  <mat-card>
+  <mat-card matTooltip="If you wish to use the full capabilities of the app, use these credentials: test@user.com, 1234">
     <mat-card-header>
       <h1>Login</h1>
     </mat-card-header>

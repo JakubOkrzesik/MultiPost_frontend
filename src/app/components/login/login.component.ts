@@ -7,6 +7,7 @@ import {MatButton} from "@angular/material/button";
 import {MatButtonToggle} from "@angular/material/button-toggle";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgIf} from "@angular/common";
+import {MatTooltip} from "@angular/material/tooltip";
 
 @Component({
   selector: 'app-login',
@@ -23,7 +24,8 @@ import {NgIf} from "@angular/common";
     MatButtonToggle,
     ReactiveFormsModule,
     NgIf,
-    MatError
+    MatError,
+    MatTooltip
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',

@@ -8,7 +8,6 @@ import {
 import {ImageUploadComponent} from "../image-upload/image-upload.component";
 import {CommonModule} from "@angular/common";
 import {AdvertService} from "../../services/advert.service";
-import {LocationFormComponent} from "../location-form/location-form.component";
 import {map, Observable, of} from "rxjs";
 import {AllegroFormsComponent} from "../allegro-forms/allegro-forms.component";
 import {MatCard, MatCardContent} from "@angular/material/card";
@@ -19,11 +18,14 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {Router} from "@angular/router";
 import {MatButtonToggle} from "@angular/material/button-toggle";
 import {Image} from "../../models/Image";
+import {MatDialog} from "@angular/material/dialog";
+import {SpinBarDialogComponent} from "../spin-bar-dialog/spin-bar-dialog.component";
+import {MatIcon} from "@angular/material/icon";
 
 @Component({
   selector: 'app-adverts-form',
   standalone: true,
-  imports: [ReactiveFormsModule, ImageUploadComponent, CommonModule, ImageUploadComponent, LocationFormComponent, AllegroFormsComponent, MatCard, MatCardContent, MatSlideToggle, OlxFormsComponent, MatButtonToggle],
+  imports: [ReactiveFormsModule, ImageUploadComponent, CommonModule, ImageUploadComponent, AllegroFormsComponent, MatCard, MatCardContent, MatSlideToggle, OlxFormsComponent, MatButtonToggle, MatIcon],
   templateUrl: './adverts-form.component.html',
   styleUrl: './adverts-form.component.scss'
 })
@@ -36,14 +38,14 @@ export class AdvertsFormComponent implements OnInit {
   public olxData: any;
 
 
-  constructor(private advertService: AdvertService, private _snackBar: MatSnackBar, private router: Router) {
+  constructor(private advertService: AdvertService, private _snackBar: MatSnackBar, private router: Router, private dialog: MatDialog) {
     this.sharedForm = new FormGroup({
       title: new FormControl('', [Validators.required, Validators.minLength(16), Validators.maxLength(70)]),
       desc: new FormControl('', [Validators.required, Validators.minLength(80), Validators.maxLength(9000)]),
       price: new FormControl('', [Validators.required]),
-      imageUrls: new FormControl([], [Validators.required]),
+      imageUrls: new FormControl([]),
       advertToggles: new FormGroup({
-        olxToggle: new FormControl({value: true, disabled: true}),
+        olxToggle: new FormControl(true),
         allegroToggle: new FormControl(false)
       })
     })
@@ -65,6 +67,10 @@ export class AdvertsFormComponent implements OnInit {
 
   openSnackBar(message: string) {
     this._snackBar.open(message, "Ok");
+  }
+
+  openSpinBarDialog() {
+    this.dialog.open(SpinBarDialogComponent);
   }
 
   onTitleBlur() {
@@ -166,16 +172,19 @@ export class AdvertsFormComponent implements OnInit {
   }
 
   onSubmit() {
+    this.openSpinBarDialog();
       this.collectFormValues().subscribe(advert => {
         console.log(advert)
         this.advertService.postAdvert(advert).subscribe({
           next: (response) => {
             if (response.status===200) {
+              this.dialog.closeAll();
               this.openSnackBar(response.message);
               this.router.navigate(['user-adverts'])
             }
           },
           error: (error) => {
+            this.dialog.closeAll();
             console.log(error);
             this.openSnackBar("Error while posting advert. Fill out your forms once again");
             this.reloadComponent();
@@ -184,13 +193,12 @@ export class AdvertsFormComponent implements OnInit {
   }
 
   private reloadComponent() {
-    // Assuming you are on the path '/allegro-forms'
     this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
       this.router.navigate(['/form']);
     });
   }
 
   submitButtonCheck() {
-    return !this.sharedForm.valid || ((this.sharedForm.get('advertToggles.allegroToggle')?.value && this.allegroData==null) || (this.sharedForm.get('advertToggles.olxToggle')?.value && this.olxData==null))
+    return !this.sharedForm.valid || (this.olxData==null && this.allegroData==null);
   }
 }

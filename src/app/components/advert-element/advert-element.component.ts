@@ -67,7 +67,7 @@ export class AdvertElementComponent implements OnInit{
 
   openPriceDialog(): void {
     const dialogRef = this.dialog.open(PriceChangeDialogComponent, {
-      data: { price: this.advert.price },
+      data: { price: this.advert.price, name: this.advert.listingName },
     });
 
     dialogRef.backdropClick().subscribe(() => {
@@ -121,5 +121,35 @@ export class AdvertElementComponent implements OnInit{
 
   conflictCheck(advert: any) {
     return advert.olxState=="REMOVED_BY_USER" && advert.allegroState=="ENDED";
+  }
+
+  olxStatusTextGenerator(olxState: any): string {
+    switch (olxState) {
+      case 'LIMITED':
+        return 'You need to buy advert packets for the listing to be posted'
+      case 'ACTIVE':
+        return 'Advert active'
+      case 'NEW':
+        return 'Advert awaiting activation'
+      case 'REMOVED_BY_USER':
+        return 'Advert inactive'
+      default:
+        return 'Check advert on OLX'
+    }
+  }
+
+  allegroStatusTextGenerator(allegroState: any): string {
+    switch (allegroState) {
+      case 'ACTIVE':
+        return 'Advert active'
+      case 'INACTIVE':
+        return 'Advert awaiting activation'
+      case 'ACTIVATING':
+        return 'Advert awaiting activation'
+      case 'ENDED':
+        return 'Advert inactive'
+      default:
+        return 'Check advert on Allegro'
+    }
   }
 }

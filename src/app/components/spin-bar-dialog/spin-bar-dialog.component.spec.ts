@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LocationFormComponent } from './location-form.component';
+import { SpinBarDialogComponent } from './spin-bar-dialog.component';
 
-describe('LocationFormComponent', () => {
-  let component: LocationFormComponent;
-  let fixture: ComponentFixture<LocationFormComponent>;
+describe('SpinBarDialogComponent', () => {
+  let component: SpinBarDialogComponent;
+  let fixture: ComponentFixture<SpinBarDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LocationFormComponent]
+      imports: [SpinBarDialogComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(LocationFormComponent);
+    fixture = TestBed.createComponent(SpinBarDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

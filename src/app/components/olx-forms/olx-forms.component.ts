@@ -1,15 +1,31 @@
-import {AfterViewInit, Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {
+  AfterViewInit,
+  Component, ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import {OlxService} from "../../services/olx.service";
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from "@angular/forms";
 import {AdvertService} from "../../services/advert.service";
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from "@angular/material/card";
-import {LocationFormComponent} from "../location-form/location-form.component";
 import {NgForOf, NgIf} from "@angular/common";
-import {distinctUntilChanged} from "rxjs";
-import {MatInput, MatLabel} from "@angular/material/input";
+import {MatError, MatFormField, MatInput, MatLabel} from "@angular/material/input";
 import {MatOption, MatSelect} from "@angular/material/select";
 import {MatButtonToggle} from "@angular/material/button-toggle";
-import {Router} from "@angular/router";
+import {GoogleMapsModule} from "@angular/google-maps";
 
 @Component({
   selector: 'app-olx-forms',
@@ -18,7 +34,6 @@ import {Router} from "@angular/router";
     ReactiveFormsModule,
     MatCard,
     MatCardContent,
-    LocationFormComponent,
     NgIf,
     NgForOf,
     MatInput,
@@ -27,7 +42,10 @@ import {Router} from "@angular/router";
     MatLabel,
     MatCardHeader,
     MatCardTitle,
-    MatButtonToggle
+    MatButtonToggle,
+    MatFormField,
+    MatError,
+    GoogleMapsModule
   ],
   templateUrl: './olx-forms.component.html',
   styleUrl: './olx-forms.component.scss'
@@ -38,20 +56,23 @@ export class OlxFormsComponent implements OnChanges, AfterViewInit{
 
   public olxForms: FormGroup;
   public formFields: any[] = [];
-  private coordinates = new Map<string, number | undefined>();
   private olxCategoryID: any;
+  private locationData: Map<string, number | undefined> = new Map();
+
+
+  @ViewChild('inputField')
+  inputField!: ElementRef;
+
+  autocomplete: google.maps.places.Autocomplete | undefined;
 
   constructor(private olxService: OlxService, private advertService: AdvertService) {
     this.olxForms = new FormGroup({
       name: new FormControl('', [Validators.required]),
       phone: new FormControl('', [Validators.required, this.advertService.exactLength(9)]),
+      location: new FormControl('', [Validators.required]),
+      locationData: new FormControl(null, [Validators.required]),
       generatedControls: new FormGroup({})
     })
-  }
-
-
-  handleLocationEvent($event: Map<string, number | undefined>) {
-    this.coordinates = $event;
   }
 
   private generateOlxForms() {
@@ -60,6 +81,7 @@ export class OlxFormsComponent implements OnChanges, AfterViewInit{
       this.olxService.getOLXCategoryAttributes(categoryID).subscribe(data => {
         this.formFields = data;
         const generatedControls = this.olxService.generateForm(this.formFields)
+        console.log(this.formFields)
         this.olxForms.setControl('generatedControls', generatedControls);
       });
     })
@@ -72,11 +94,11 @@ export class OlxFormsComponent implements OnChanges, AfterViewInit{
 
   private validFormWatcher() {
     this.olxForms.statusChanges.subscribe((response) => {
-      if (response==="VALID" && this.coordinates.size!==0) {
+      if (response==="VALID") {
         const olxFormData = {
           ...this.olxForms.value,
           category_id: this.olxCategoryID,
-          location: this.coordinates
+          location: this.locationData
         }
         this.olxFormDataEvent.emit(olxFormData);
         console.log("OLX data emitted")
@@ -84,6 +106,17 @@ export class OlxFormsComponent implements OnChanges, AfterViewInit{
         this.olxFormDataEvent.emit(null)
       }
     });
+  }
+
+  private locationWatcher() {
+    this.olxForms.controls['location'].valueChanges.subscribe(value => {
+      if (value=='') {
+        console.log('Coordinates reset')
+        this.olxForms.patchValue({
+          locationData: null
+        })
+      }
+    })
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -97,6 +130,35 @@ export class OlxFormsComponent implements OnChanges, AfterViewInit{
 
   ngAfterViewInit(): void {
     this.validFormWatcher();
+    this.locationWatcher()
+
+    // Google maps autocomplete is used to aid the user with providing the location
+    this.autocomplete = new google.maps.places.Autocomplete(this.inputField.nativeElement, {
+      types: ['(cities)'],
+      componentRestrictions: { country: 'PL' } // Restrict to Poland
+    });
+
+    this.autocomplete.addListener('place_changed', () => {
+      const place = this.autocomplete?.getPlace();
+      if (place?.geometry && place.geometry.viewport) {
+        this.locationData.set("lat", place.geometry.viewport.getCenter().lat());
+        this.locationData.set("lng", place.geometry.viewport.getCenter().lng());
+        this.olxForms.patchValue({
+          locationData: this.locationData
+        })
+      } else if (place?.geometry && place.geometry.location) {
+        // Fallback if viewport is not available
+        this.locationData.set("lat", place.geometry.location.lat());
+        this.locationData.set("lng", place.geometry.location.lng());
+      }
+    });
   }
 
+  formRequirementCheck(field: any) {
+    return (this.olxForms.get('generatedControls') as FormGroup).controls[field].hasError('required')
+  }
+
+  numericFormValidationErrors(field: any) {
+    return field.validation.numeric && ((this.olxForms.get('generatedControls') as FormGroup).controls[field.code].hasError('min') || (this.olxForms.get('generatedControls') as FormGroup).controls[field.code].hasError('max'));
+  }
 }

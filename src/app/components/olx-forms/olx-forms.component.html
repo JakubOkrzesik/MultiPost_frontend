@@ -1,36 +1,53 @@
-<form [formGroup]="olxForms">
-  <mat-card>
-    <mat-card-content>
-      <mat-card-title>
-        <h2>Olx Fields</h2>
-      </mat-card-title>
-      <p>Enter advert title to reveal mandatory OLX fields</p>
-      <div class="form-group">
-        <label for="name">Name of seller</label>
-        <input matInput type="text" id="name" class="form-control" formControlName="name">
-        <div class="text-danger" *ngIf="olxForms.controls['name'].invalid && (olxForms.controls['name'].touched || olxForms.controls['name'].dirty)">
-          <span *ngIf="olxForms.controls['name'].errors?.['required']">This is required</span>
+<div class="container">
+  <mat-card-title>
+    <h2>Olx Fields</h2>
+  </mat-card-title>
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <form [formGroup]="olxForms">
+        <h3>Enter advert title to reveal mandatory OLX fields</h3>
+
+        <div class="form-group">
+          <label for="name">Name of seller</label>
+          <input matInput type="text" id="name" class="form-control" formControlName="name">
+          <div class="text-danger" *ngIf="olxForms.controls['name'].invalid && (olxForms.controls['name'].touched || olxForms.controls['name'].dirty)">
+            <span *ngIf="olxForms.controls['name'].errors?.['required']">This is required</span>
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label for="phone">Phone number</label>
-        <input matInput type="number" id="phone" class="form-control" formControlName="phone">
-        <div class="text-danger" *ngIf="olxForms.controls['phone'].invalid && (olxForms.controls['phone'].touched || olxForms.controls['phone'].dirty)">
-          <span *ngIf="olxForms.controls['phone'].errors?.['required']">This is required</span>
-          <span *ngIf="olxForms.controls['phone'].errors?.['lengthError']">Provide a valid telephone number</span>
+
+        <div class="form-group">
+          <label for="phone">Phone number</label>
+          <input matInput type="number" id="phone" class="form-control" formControlName="phone">
+          <div class="text-danger" *ngIf="olxForms.controls['phone'].invalid && (olxForms.controls['phone'].touched || olxForms.controls['phone'].dirty)">
+            <span *ngIf="olxForms.controls['phone'].errors?.['required']">This is required</span>
+            <span *ngIf="olxForms.controls['phone'].errors?.['lengthError']">Provide a valid telephone number</span>
+          </div>
         </div>
-      </div>
-      <app-location-form (locationEvent)="handleLocationEvent($event)"></app-location-form>
-      <div formGroupName="generatedControls">
-      <div *ngFor="let field of formFields" class="form-group">
-        <mat-label>{{ field.label }}</mat-label>
-        <mat-select *ngIf="field.values.length > 0" [formControlName]="field.code" class="form-control">
-          <mat-option *ngFor="let value of field.values" [value]="value.code">{{ value.label }}</mat-option>
-        </mat-select>
-        <input matInput *ngIf="field.values.length === 0 && field.validation.numeric" type="number" [formControlName]="field.code" class="form-control">
-        <input matInput *ngIf="field.values.length === 0 && !field.validation.numeric" type="text" [formControlName]="field.code" class="form-control">
-      </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
-</form>
+
+        <div class="google-suggest-form">
+          <mat-form-field>
+            <input #inputField matInput formControlName="location">
+            <mat-error *ngIf="olxForms.controls['location'].hasError('required')">This field is <strong>required</strong></mat-error>
+          </mat-form-field>
+        </div>
+
+
+        <div formGroupName="generatedControls">
+        <div *ngFor="let field of formFields" class="form-group">
+          <mat-form-field>
+            <mat-label>{{ field.label }}</mat-label>
+            <mat-select *ngIf="field.values.length > 0" [formControlName]="field.code">
+              <mat-option *ngFor="let value of field.values" [value]="value.code">{{ value.label }}</mat-option>
+            </mat-select>
+            <input matInput *ngIf="field.values.length === 0 && field.validation.numeric" type="number" [formControlName]="field.code" class="form-control">
+            <input matInput *ngIf="field.values.length === 0 && !field.validation.numeric" type="text" [formControlName]="field.code" class="form-control">
+            <mat-error *ngIf="formRequirementCheck(field.code)">This field is <strong>required</strong></mat-error>
+            <mat-error *ngIf="numericFormValidationErrors(field)">Input a value between <strong>{{field.validation.min}} and {{field.validation.max}}</strong></mat-error>
+          </mat-form-field>
+        </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

@@ -10,11 +10,15 @@
       <form [formGroup]="sharedForm" (ngSubmit)="onSubmit()">
         <div class="form-group row justify-content-center" formGroupName="advertToggles">
           <div class="col-sm-5">
-            <p class="text-center"><mat-slide-toggle formControlName="olxToggle" [disabled]="!sharedForm.get('advertToggles.allegroToggle')?.value">Post using OLX</mat-slide-toggle></p>
+            <p class="text-center"><mat-slide-toggle formControlName="olxToggle">Post using OLX</mat-slide-toggle></p>
           </div>
           <div class="col-sm-5">
-            <p class="text-center"><mat-slide-toggle formControlName="allegroToggle" [disabled]="!sharedForm.get('advertToggles.olxToggle')?.value">Post using Allegro</mat-slide-toggle></p>
+            <p class="text-center"><mat-slide-toggle formControlName="allegroToggle">Post using Allegro</mat-slide-toggle></p>
           </div>
+        </div>
+        <div *ngIf="!sharedForm.get('advertToggles.olxToggle')?.value && !sharedForm.get('advertToggles.allegroToggle')?.value" class="user-toggle-info">
+          <mat-icon fontIcon="warning"></mat-icon>
+          <p>You need to select <strong>at least one toggle</strong> to post an advert</p>
         </div>
         <div class="form-group">
           <label for="title">Title</label>
@@ -41,8 +45,12 @@
         </div>
 
         <app-image-upload (imageEvent)="handleImageEvent($event)" requiredFileType="input/png"></app-image-upload>
-        <div class="olxForms">
-          <app-olx-forms *ngIf="sharedForm.get('advertToggles.olxToggle')?.value" (olxFormDataEvent)="handleOlxFormEvent($event)" [title]="title"></app-olx-forms>
+        <div class="olxForms" *ngIf="sharedForm.get('advertToggles.olxToggle')?.value">
+          <mat-card>
+            <mat-card-content>
+              <app-olx-forms (olxFormDataEvent)="handleOlxFormEvent($event)" [title]="title"></app-olx-forms>
+            </mat-card-content>
+          </mat-card>
         </div>
             <div class="allegroForms" *ngIf="sharedForm.get('advertToggles.allegroToggle')?.value">
               <mat-card>

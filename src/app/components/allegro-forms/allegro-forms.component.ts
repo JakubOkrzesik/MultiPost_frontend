@@ -70,11 +70,9 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
 
   private setupCategoryIDSubscription() {
     this.allegroForm.get('category')?.valueChanges.subscribe(categoryId => {
-      if (!this.allegroForm.controls['isGTINActive'].value && categoryId!='') {
-        this.deleteSubscriptions();
+      if (!this.allegroForm.controls['isGTINActive'].value && categoryId!='' && categoryId!=null) {
         this.productParameters = [];
         this.missingParams = [];
-        this.allegroForm.setControl('paramForms', new FormGroup({temp: new FormControl('', [Validators.required])}));
         // in order to ensure that the correct param forms are displayed also that the form stays invalid will have to do for now
         this.allegroService.allegroQuerySearch( this.allegroForm.get('productQuery')?.value, categoryId).subscribe(response => {
           // products labeled as "LISTED" do not require further approval from allegro and can be immediately posted
@@ -86,8 +84,8 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
 
   private setupProductIDSubscription() {
     this.allegroForm.controls['productId']?.valueChanges.subscribe(result => {
-      console.log("product value changed")
-      if (!this.allegroForm.controls['isGTINActive'].value && result!='') {
+      if (!this.allegroForm.controls['isGTINActive'].value && result!='' && result!=null) {
+        // deleting subscriptions so that there arent memory spills and multiple data emissions
         this.deleteSubscriptions();
         const productIdSubscription = this.allegroService.getAllegroProductbyID(result).subscribe(productData => {
           this.productParameters = productData.parameters;
@@ -139,6 +137,7 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
         const [formGroup, missingParams, missingParamsMap] = this.allegroService.getAllegroMissingParams(this.requiredParamsArray, this.productParameters);
         this.allegroForm.setControl('paramForms', formGroup);
         this.missingParams = missingParams;
+        console.log(missingParams)
         this.missingParamsMap = missingParamsMap
         // copy of the original values because if the dictionary belongs to a child component it will be getting updated
         this.missingParams.forEach(field => field.originalDictionary = field.dictionary);
@@ -163,7 +162,7 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
 
   private setupFormValidationSubscription() {
     this.allegroForm.statusChanges.subscribe((response) => {
-      if (response==="VALID") {
+      if (response==="VALID" && this.missingParams.length!=0) {
         const productParameters: any[] = []
         const offerParameters: any[] = []
         Object.keys((this.allegroForm.get('paramForms') as FormGroup).controls).forEach((id) => {
@@ -213,13 +212,10 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
     this.categoryData = [];
     this.productArray = [];
     this.missingParams = [];
-    this.ngOnDestroy();
+    this.deleteSubscriptions();
     this.allegroForm.reset({
-      category: '',
-      productId: '',
-      paramForms: {}
+      isGTINActive: this.allegroForm.get('isGTINActive')?.value
     });
-    console.log(this.allegroForm);
   }
 
   // is responsible for updating data of the dependent form options - some form entries are dependent on parent value for example Manufacturer - Apple, product - Iphone 12
@@ -246,6 +242,11 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
 
   private deleteSubscriptions() {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    console.log("subscriptions deleted");
+  }
+
+  formRequirementCheck(fieldId: any) {
+    return (this.allegroForm.get('paramForms') as FormGroup).controls[fieldId].hasError('required')
   }
 
   onSubmit() {

@@ -1,4 +1,4 @@
-.form-group {
+ .form-group {
   margin-bottom: 20px;
 }
 
@@ -33,6 +33,22 @@
 .advert-list-button {
   margin-left: 10px;
 }
+
+ .user-toggle-info {
+   color: red;
+   display: flex;
+   justify-content: center;
+ }
+ .user-toggle-info mat-icon {
+   color: red;
+   font-size: 30px;
+   width: 30px;
+   height: 30px;
+ }
+
+ .user-toggle-info p {
+   padding-top: 6px;
+ }
 
 h1 {
   font-weight: bold;

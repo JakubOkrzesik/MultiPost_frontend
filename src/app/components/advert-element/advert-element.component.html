@@ -4,13 +4,13 @@
     <mat-card-title>{{ advert.listingName }}</mat-card-title>
   </mat-card-header>
   <mat-card-content>
-    <p><strong>OLX State:</strong> {{ advert.olxState ?  advert.olxState : 'Advert not posted on OLX'}}</p>
-    <p><strong>Allegro State:</strong> {{ advert.allegroState ? advert.allegroState : 'Advert not posted on Allegro' }}</p>
+    <p><strong>OLX State:</strong> {{ olxStatusTextGenerator(advert.olxState) }}</p>
+    <p><strong>Allegro State:</strong> {{ allegroStatusTextGenerator(advert.allegroState) }}</p>
     <p><strong>Current price:</strong> {{ advert.price }}</p>
   </mat-card-content>
   <mat-card-actions>
     <a mat-button [hidden]="advert.soldOn!='NONE' || (conflictCheck(advert) && advert.soldOn=='NONE')"  (click)="openPriceDialog()">Change current price</a>
-    <a mat-button (click)="openDeleteDialog()">Delete advert</a>
+    <a mat-button [hidden]="advert.olxState=='NEW'" (click)="openDeleteDialog()">Delete advert</a>
     <a mat-button (click)="getOlxUrl(advert.olxId)" [hidden]="!advert.olxId" target="_blank">View on OLX</a>
     <a mat-button (click)="getAllegroUrl(advert.allegroId)" [hidden]="!advert.allegroId" target="_blank">View on Allegro</a>
   </mat-card-actions>
