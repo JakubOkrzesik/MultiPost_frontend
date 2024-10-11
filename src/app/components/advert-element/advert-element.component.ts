@@ -133,6 +133,8 @@ export class AdvertElementComponent implements OnInit{
         return 'Advert awaiting activation'
       case 'REMOVED_BY_USER':
         return 'Advert inactive'
+      case null:
+        return 'Advert not posted on OLX'
       default:
         return 'Check advert on OLX'
     }
@@ -148,6 +150,8 @@ export class AdvertElementComponent implements OnInit{
         return 'Advert awaiting activation'
       case 'ENDED':
         return 'Advert inactive'
+      case null:
+        return 'Advert not posted on Allegro'
       default:
         return 'Check advert on Allegro'
     }
