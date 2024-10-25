@@ -55,9 +55,9 @@ export class OlxService {
     return this.http.get(url, {observe: "body", headers: headers})
   }
 
-  getAdvert(id: any) {
+  /*getAdvert(id: any) {
     const headers = this.getAuthHeaders()
     const url = `${this.baseUrl}/olx/advert/${id}`;
     return this.http.get(url, {observe: "body", headers: headers})
-  }
+  }*/
 }
