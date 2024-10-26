@@ -43,7 +43,7 @@ export class AdvertsFormComponent implements OnInit {
       title: new FormControl('', [Validators.required, Validators.minLength(16), Validators.maxLength(70)]),
       desc: new FormControl('', [Validators.required, Validators.minLength(80), Validators.maxLength(9000)]),
       price: new FormControl('', [Validators.required]),
-      imageUrls: new FormControl([]),
+      imageUrls: new FormControl([], [Validators.required]),
       advertToggles: new FormGroup({
         olxToggle: new FormControl(true),
         allegroToggle: new FormControl(false)
@@ -199,6 +199,12 @@ export class AdvertsFormComponent implements OnInit {
   }
 
   submitButtonCheck() {
-    return !this.sharedForm.valid || (this.olxData==null && this.allegroData==null);
+    const isFormInvalid = !this.sharedForm.valid;
+    const isOlxRequiredButMissing = this.sharedForm.get('advertToggles.olxToggle')?.value && this.olxData == null;
+    const isAllegroRequiredButMissing = this.sharedForm.get('advertToggles.allegroToggle')?.value && this.allegroData == null;
+    const isNeitherToggleSelected = !this.sharedForm.get('advertToggles.olxToggle')?.value && !this.sharedForm.get('advertToggles.allegroToggle')?.value;
+
+    return isFormInvalid || isOlxRequiredButMissing || isAllegroRequiredButMissing || isNeitherToggleSelected;
+
   }
 }
