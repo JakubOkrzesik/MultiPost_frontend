@@ -3,16 +3,16 @@ import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import {AbstractControl, ValidationErrors, ValidatorFn} from "@angular/forms";
 import {Observable} from "rxjs";
 import {Coordinates} from "../models/Coordinates";
-import {GlobalService} from "./global.service";
+import {ConfigService} from "./config.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdvertService {
 
-  constructor(private http: HttpClient, private globalService: GlobalService) {}
+  constructor(private http: HttpClient, private configService: ConfigService) {}
 
-  private baseUrl = this.globalService.baseUrl;
+  private baseUrl: string = this.configService.ip + ':8080';
   private separator = /\s+/gmu;
 
   postAdvert(json: object): Observable<any> {

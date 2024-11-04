@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {Observable} from "rxjs";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {AdvertService} from "./advert.service";
-import {GlobalService} from "./global.service";
+import {ConfigService} from "./config.service";
 
 @Injectable({
   providedIn: 'root'
@@ -11,9 +11,9 @@ import {GlobalService} from "./global.service";
 export class AllegroService {
 
 
-  constructor(private http: HttpClient, private fb: FormBuilder, private advertService: AdvertService, private globalService: GlobalService) { }
+  constructor(private http: HttpClient, private fb: FormBuilder, private advertService: AdvertService, private configService: ConfigService) { }
 
-  private baseUrl = this.globalService.baseUrl;
+  private baseUrl = this.configService.ip + ':8080';
 
   private getAuthHeaders() {
     return new HttpHeaders({ 'Authorization': "Bearer " + String(localStorage.getItem("jwtToken")) });

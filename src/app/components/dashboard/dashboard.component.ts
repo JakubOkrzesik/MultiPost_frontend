@@ -7,7 +7,7 @@ import {MatCard, MatCardContent, MatCardFooter, MatCardHeader} from "@angular/ma
 import {MatLabel} from "@angular/material/form-field";
 import {Router} from "@angular/router";
 import {MatTooltip} from "@angular/material/tooltip";
-import {GlobalService} from "../../services/global.service";
+import {ConfigService} from "../../services/config.service";
 
 @Component({
   selector: 'app-dashboard',
@@ -33,9 +33,9 @@ export class DashboardComponent implements OnInit {
   isOlxAuth!: boolean;
   isAllegroAuth!: boolean
   olxUrl: string = 'https://www.olx.pl/oauth/authorize/?client_id=202118&response_type=code&state=x93ld3v&scope=read+write+v2'
-  allegroUrl: string = `https://allegro.pl.allegrosandbox.pl/auth/oauth/authorize?response_type=code&client_id=917dfa08cadf465eb0ffc3d3b3a52c14&redirect_uri=${this.globalService.callbackUrl}/allegro-auth-callback`
+  allegroUrl: string = `https://allegro.pl.allegrosandbox.pl/auth/oauth/authorize?response_type=code&client_id=917dfa08cadf465eb0ffc3d3b3a52c14&redirect_uri=${this.configService.ip}:4200/allegro-auth-callback`
 
-    constructor(public authService: AuthService, private router: Router, private globalService: GlobalService) {
+    constructor(public authService: AuthService, private router: Router, private configService: ConfigService) {
   }
 
   ngOnInit(): void {

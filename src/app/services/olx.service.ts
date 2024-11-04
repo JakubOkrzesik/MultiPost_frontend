@@ -2,16 +2,16 @@ import { Injectable } from '@angular/core';
 import {Observable} from "rxjs";
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {GlobalService} from "./global.service";
+import {ConfigService} from "./config.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class OlxService {
 
-  constructor(private http: HttpClient, private fb: FormBuilder, private globalService: GlobalService) {}
+  constructor(private http: HttpClient, private fb: FormBuilder, private configService: ConfigService) {}
 
-  private baseUrl = this.globalService.baseUrl;
+  private baseUrl = this.configService.ip + ':8080';
 
 
   private getAuthHeaders() {

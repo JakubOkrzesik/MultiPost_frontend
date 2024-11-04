@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpResponse } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {Router} from "@angular/router";
 import {Observable} from "rxjs";
-import {GlobalService} from "./global.service";
+import {ConfigService} from "./config.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Injectable({
@@ -10,9 +10,9 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 })
 export class AuthService {
 
-  constructor(private http: HttpClient, private router: Router, private globalService: GlobalService, private _snackBar: MatSnackBar) {}
+  constructor(private http: HttpClient, private router: Router, private configService: ConfigService, private _snackBar: MatSnackBar) {}
 
-  private baseUrl = this.globalService.baseUrl;
+  private baseUrl = this.configService.ip + ':8080';
 
   loginSubmit(email: string, password: string): void {
     const formData = { email, password };
