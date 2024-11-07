@@ -10,9 +10,15 @@ import {ConfigService} from "./config.service";
 })
 export class AdvertService {
 
-  constructor(private http: HttpClient, private configService: ConfigService) {}
+  constructor(private http: HttpClient, private configService: ConfigService) {
+    this.configService.ip$.subscribe(ip => {
+      if (ip) {
+        this.baseUrl = `${ip}:8080`
+      }
+    })
+  }
 
-  private baseUrl: string = this.configService.ip + ':8080';
+  private baseUrl: string | undefined;
   private separator = /\s+/gmu;
 
   postAdvert(json: object): Observable<any> {

@@ -85,7 +85,7 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
   private setupProductIDSubscription() {
     this.allegroForm.controls['productId']?.valueChanges.subscribe(result => {
       if (!this.allegroForm.controls['isGTINActive'].value && result!='' && result!=null) {
-        // deleting subscriptions so that there arent memory spills and multiple data emissions
+        // deleting subscriptions so that there are no memory spills and multiple data emissions
         this.deleteSubscriptions();
         const productIdSubscription = this.allegroService.getAllegroProductbyID(result).subscribe(productData => {
           this.productParameters = productData.parameters;
@@ -219,7 +219,7 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
   }
 
   // is responsible for updating data of the dependent form options - some form entries are dependent on parent value for example Manufacturer - Apple, product - Iphone 12
-  // this functions ensures only correct child options are visible
+  // this function ensures only correct child options are visible
   private updateDependentOptions(field: any, parentIdValue: any) {
     if (!field.originalDictionary) {
       return [];

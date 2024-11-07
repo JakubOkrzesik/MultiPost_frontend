@@ -9,9 +9,11 @@ import {ConfigService} from "./config.service";
 })
 export class OlxService {
 
-  constructor(private http: HttpClient, private fb: FormBuilder, private configService: ConfigService) {}
+  constructor(private http: HttpClient, private fb: FormBuilder, private configService: ConfigService) {
+    this.configService.ip$.pipe()
+  }
 
-  private baseUrl = this.configService.ip + ':8080';
+  private baseUrl: string | undefined;
 
 
   private getAuthHeaders() {

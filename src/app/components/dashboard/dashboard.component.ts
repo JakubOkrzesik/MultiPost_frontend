@@ -29,14 +29,19 @@ import {ConfigService} from "../../services/config.service";
 })
 export class DashboardComponent implements OnInit {
 
+    constructor(public authService: AuthService, private router: Router, private configService: ConfigService) {
+      this.configService.ip$.subscribe(ip => {
+        if (ip) {
+          this.allegroUrl = `https://allegro.pl.allegrosandbox.pl/auth/oauth/authorize?response_type=code&client_id=917dfa08cadf465eb0ffc3d3b3a52c14&redirect_uri=${ip}:4200/allegro-auth-callback`
+        }
+      })
+    }
+
   name!: string;
   isOlxAuth!: boolean;
-  isAllegroAuth!: boolean
-  olxUrl: string = 'https://www.olx.pl/oauth/authorize/?client_id=202118&response_type=code&state=x93ld3v&scope=read+write+v2'
-  allegroUrl: string = `https://allegro.pl.allegrosandbox.pl/auth/oauth/authorize?response_type=code&client_id=917dfa08cadf465eb0ffc3d3b3a52c14&redirect_uri=${this.configService.ip}:4200/allegro-auth-callback`
-
-    constructor(public authService: AuthService, private router: Router, private configService: ConfigService) {
-  }
+  isAllegroAuth!: boolean;
+  olxUrl: string = 'https://www.olx.pl/oauth/authorize/?client_id=202118&response_type=code&state=x93ld3v&scope=read+write+v2';
+  allegroUrl!: string;
 
   ngOnInit(): void {
     this.authService.getUserDetails().subscribe(response => {

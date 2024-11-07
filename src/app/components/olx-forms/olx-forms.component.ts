@@ -4,19 +4,15 @@ import {
   EventEmitter,
   Input,
   OnChanges,
-  OnInit,
   Output,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
 import {OlxService} from "../../services/olx.service";
 import {
-  AbstractControl,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
-  ValidatorFn,
   Validators
 } from "@angular/forms";
 import {AdvertService} from "../../services/advert.service";

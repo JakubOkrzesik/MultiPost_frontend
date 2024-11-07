@@ -11,9 +11,15 @@ import {ConfigService} from "./config.service";
 export class AllegroService {
 
 
-  constructor(private http: HttpClient, private fb: FormBuilder, private advertService: AdvertService, private configService: ConfigService) { }
+  constructor(private http: HttpClient, private fb: FormBuilder, private advertService: AdvertService, private configService: ConfigService) {
+    this.configService.ip$.subscribe(ip => {
+      if (ip) {
+        this.baseUrl = `${ip}:8080`
+      }
+    })
+  }
 
-  private baseUrl = this.configService.ip + ':8080';
+  private baseUrl: string | undefined;
 
   private getAuthHeaders() {
     return new HttpHeaders({ 'Authorization': "Bearer " + String(localStorage.getItem("jwtToken")) });

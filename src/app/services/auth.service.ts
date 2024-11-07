@@ -10,9 +10,15 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 })
 export class AuthService {
 
-  constructor(private http: HttpClient, private router: Router, private configService: ConfigService, private _snackBar: MatSnackBar) {}
+  constructor(private http: HttpClient, private router: Router, private configService: ConfigService, private _snackBar: MatSnackBar) {
+    this.configService.ip$.subscribe(ip => {
+      if (ip) {
+        this.baseUrl = `${ip}:8080`
+      }
+    })
+  }
 
-  private baseUrl = this.configService.ip + ':8080';
+  private baseUrl: string | undefined;
 
   loginSubmit(email: string, password: string): void {
     const formData = { email, password };

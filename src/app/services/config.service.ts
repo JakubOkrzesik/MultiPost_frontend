@@ -1,20 +1,23 @@
-import {Injectable, OnInit} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
+import {BehaviorSubject} from "rxjs";
+import {Config} from "../models/Config";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConfigService {
 
-  ip: any;
+  private ipSubject = new BehaviorSubject<string | null>(null);
+  ip$ = this.ipSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
   loadConfig() {
-    this.http.get<any>('/assets/config.json', {observe: "body", responseType: "json"}).subscribe({
+    this.http.get<Config>('/assets/config.json', {observe: "body", responseType: "json"}).subscribe({
       next: config => {
-        this.ip = config.ip;
         this.loadGoogleApi(config.google_api_key);
+        this.ipSubject.next(config.ip_address);
       },
       error: () => console.log("An error occured")
     })
