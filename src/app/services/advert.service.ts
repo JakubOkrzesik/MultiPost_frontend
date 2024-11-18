@@ -1,21 +1,25 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import {AbstractControl, ValidationErrors, ValidatorFn} from "@angular/forms";
-import {Observable} from "rxjs";
+import {catchError, filter, Observable, take, tap} from "rxjs";
 import {Coordinates} from "../models/Coordinates";
 import {ConfigService} from "./config.service";
+import {ErrorMsgService} from "./error-msg.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdvertService {
 
-  constructor(private http: HttpClient, private configService: ConfigService) {
-    this.configService.ip$.subscribe(ip => {
+  constructor(private http: HttpClient, private configService: ConfigService, private errorMsgService: ErrorMsgService) {
+    this.configService.ip$.pipe(
+      filter(ip => !!ip),
+      take(1),
+      tap(ip => {
       if (ip) {
-        this.baseUrl = `${ip}:8080`
+        this.baseUrl = `${ip}:8080/api/v1`
       }
-    })
+    })).subscribe()
   }
 
   private baseUrl: string | undefined;

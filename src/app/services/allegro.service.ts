@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import {Injectable, OnInit} from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
-import {Observable} from "rxjs";
+import {filter, Observable, take, tap} from "rxjs";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {AdvertService} from "./advert.service";
 import {ConfigService} from "./config.service";
@@ -10,16 +10,19 @@ import {ConfigService} from "./config.service";
 })
 export class AllegroService {
 
+  private baseUrl: string | undefined;
 
   constructor(private http: HttpClient, private fb: FormBuilder, private advertService: AdvertService, private configService: ConfigService) {
-    this.configService.ip$.subscribe(ip => {
-      if (ip) {
-        this.baseUrl = `${ip}:8080`
-      }
-    })
+    this.configService.ip$.pipe(
+      filter(ip => !!ip),
+      take(1),
+      tap(ip => {
+        if (ip) {
+          this.baseUrl = `${ip}:8080/api/v1`
+        }
+      })).subscribe()
   }
 
-  private baseUrl: string | undefined;
 
   private getAuthHeaders() {
     return new HttpHeaders({ 'Authorization': "Bearer " + String(localStorage.getItem("jwtToken")) });
@@ -85,12 +88,14 @@ export class AllegroService {
   allegroAuth(code: any) {
     const headers = this.getAuthHeaders()
     const url = `${this.baseUrl}/service_auth/allegro?code=${code}`;
+    console.log(url);
+    console.log(this.baseUrl);
     return this.http.get(url, {observe: "body", headers: headers})
   }
 
-  getAdvert(id: any) {
+  /*getAdvert(id: any) {
     const headers = this.getAuthHeaders()
     const url = `${this.baseUrl}/allegro/advert/${id}`;
     return this.http.get(url, {observe: "body", headers: headers})
-  }
+  }*/
 }

@@ -10,6 +10,7 @@ import {MatCard, MatCardContent} from "@angular/material/card";
 import {catchError, filter, of, Subscription, switchMap, tap} from "rxjs";
 import {MatInput} from "@angular/material/input";
 import {NgxMatSelectSearchModule} from "ngx-mat-select-search";
+import {ErrorMsgService} from "../../services/error-msg.service";
 
 @Component({
   selector: 'app-allegro-forms',
@@ -50,7 +51,7 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
   private subscriptions: Subscription[] = [];
   private missingParamsMap!: Map<any, any>;
 
-  constructor(private allegroService: AllegroService) {
+  constructor(private allegroService: AllegroService, private errorService: ErrorMsgService) {
     this.allegroForm = new FormGroup({
       productQuery: new FormControl(''),
       GTIN: new FormControl('', [Validators.minLength(12), Validators.maxLength(12)]),
@@ -74,35 +75,35 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
 
   private setupCategoryIDSubscription() {
     return this.allegroForm.get('category')?.valueChanges.pipe(tap(categoryId => {
-      if (!this.allegroForm.controls['isGTINActive'].value && categoryId!='' && categoryId!=null) {
-        this.productParameters = [];
-        this.missingParams = [];
-        // in order to ensure that the correct param forms are displayed also that the form stays invalid will have to do for now
-      }
-    }),
-      switchMap((categoryId) => this.allegroService.allegroQuerySearch( this.allegroForm.get('productQuery')?.value, categoryId).pipe(tap(response => {
+        if (!this.allegroForm.controls['isGTINActive'].value && categoryId != '' && categoryId != null) {
+          this.productParameters = [];
+          this.missingParams = [];
+          // in order to ensure that the correct param forms are displayed also that the form stays invalid will have to do for now
+        }
+      }),
+      switchMap((categoryId) => this.allegroService.allegroQuerySearch(this.allegroForm.get('productQuery')?.value, categoryId).pipe(tap(response => {
         // products labeled as "LISTED" do not require further approval from allegro and can be immediately posted
-        this.productArray = response.products.filter((product: any) => product.publication.status==="LISTED");
+        this.productArray = response.products.filter((product: any) => product.publication.status === "LISTED");
       }))),
       catchError((err) => {
-        console.error(err);
+        this.errorService.displayErrorMessage(err);
         return of(null);
       })).subscribe({
-      complete: () => console.log("Category selected, product list fetched")
+        complete: () => console.log("Category selected, product list fetched")
       }
     )
   }
 
   private setupProductIDSubscription() {
-    this.allegroForm.controls['productId']?.valueChanges.pipe(filter(result => !this.allegroForm.controls['isGTINActive'].value && result!='' && result!=null),
+    this.allegroForm.controls['productId']?.valueChanges.pipe(filter(result => !this.allegroForm.controls['isGTINActive'].value && result != '' && result != null),
       switchMap((result) => this.allegroService.getAllegroProductbyID(result).pipe(tap(productData => {
         this.productParameters = productData.parameters;
       }), switchMap(() => this.generateParamForms()))),
       catchError((err) => {
-        console.error(err);
+        this.errorService.displayErrorMessage(err);
         return of(null);
       })).subscribe({
-      complete: () => console.log("Product ID selected. Product forms fetched and retrieved")
+        complete: () => console.log("Product ID selected. Product forms fetched and retrieved")
       }
     )
   }
@@ -111,17 +112,17 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
     // searches product by GTIN number and generates forms according to the productId
     const gtinValue = this.allegroForm.controls['GTIN'].value;
     this.allegroService.allegroGtinSearch(gtinValue).pipe(tap(response => {
-      const product = response.products[0]
-      this.allegroForm.controls['productId'].setValue(product.id)
-      this.allegroForm.controls['category'].setValue(product.category.id)
-      this.productName = product.name;
-      // makes the GTIN form disabled - user needs to press the edit button to edit the GTIN number
-      this.isReadOnly = true;
-      this.productParameters = product.parameters;
-    }),
+        const product = response.products[0]
+        this.allegroForm.controls['productId'].setValue(product.id)
+        this.allegroForm.controls['category'].setValue(product.category.id)
+        this.productName = product.name;
+        // makes the GTIN form disabled - user needs to press the edit button to edit the GTIN number
+        this.isReadOnly = true;
+        this.productParameters = product.parameters;
+      }),
       switchMap(() => this.generateParamForms()),
       catchError(err => {
-        console.error(err);
+        this.errorService.displayErrorMessage(err);
         return of(null);
       })).subscribe({
       complete: () => console.log("Category information fetched")
@@ -138,7 +139,7 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
         this.categoryData = response.matchingCategories;
       }),
       catchError(err => {
-        console.error(err);
+        this.errorService.displayErrorMessage(err);
         return of(null);  // Handle the error and return a fallback value
       })
     ).subscribe({
@@ -148,20 +149,20 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
 
 
   private generateParamForms() {
-      const categoryId = this.allegroForm.get('category')?.value
-      return this.allegroService.getAllegroCategoryParams(categoryId).pipe(tap(response => {
-        // searching for only the required parameters
-        this.requiredParamsArray = response.parameters.filter((param: any) => param.required);
-        // comparing the product params to category params and selecting the ones that are missing
-        const [formGroup, missingParams, missingParamsMap] = this.allegroService.getAllegroMissingParams(this.requiredParamsArray, this.productParameters);
-        this.allegroForm.setControl('paramForms', formGroup);
-        this.missingParams = missingParams;
-        console.log(missingParams)
-        this.missingParamsMap = missingParamsMap
-        // copy of the original values because if the dictionary belongs to a child component it will be getting updated
-        this.missingParams.forEach(field => field.originalDictionary = field.dictionary);
-        this.setupParamFormSubscriptions();
-      }))
+    const categoryId = this.allegroForm.get('category')?.value
+    return this.allegroService.getAllegroCategoryParams(categoryId).pipe(tap(response => {
+      // searching for only the required parameters
+      this.requiredParamsArray = response.parameters.filter((param: any) => param.required);
+      // comparing the product params to category params and selecting the ones that are missing
+      const [formGroup, missingParams, missingParamsMap] = this.allegroService.getAllegroMissingParams(this.requiredParamsArray, this.productParameters);
+      this.allegroForm.setControl('paramForms', formGroup);
+      this.missingParams = missingParams;
+      console.log(missingParams)
+      this.missingParamsMap = missingParamsMap
+      // copy of the original values because if the dictionary belongs to a child component it will be getting updated
+      this.missingParams.forEach(field => field.originalDictionary = field.dictionary);
+      this.setupParamFormSubscriptions();
+    }))
   }
 
   // needs reevaluation
@@ -180,9 +181,15 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
   }
 
   private setupFormValidationSubscription() {
-    this.allegroForm.statusChanges.pipe(filter((status) => status==="VALID" && this.missingParams.length!=0), tap(
-
-    ))
+    this.allegroForm.statusChanges.pipe(
+      tap((status) => {
+        if (status === "VALID" && this.missingParams.length != 0) {
+          this.emitAllegroFormData();
+        } else {
+          this.emitNullValue();
+        }
+      })
+    ).subscribe();
   }
 
   private emitAllegroFormData() {
@@ -191,7 +198,7 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
     Object.keys((this.allegroForm.get('paramForms') as FormGroup).controls).forEach((id) => {
       let entry;
       // need to add support for range values
-      if (this.missingParamsMap.get(id).type=="dictionary") {
+      if (this.missingParamsMap.get(id).type == "dictionary") {
         entry = {
           id: id,
           valuesIds: [this.allegroForm.get('paramForms')?.get(id)?.value],
@@ -276,8 +283,7 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
     const isGTINActive = this.allegroForm.controls['isGTINActive'].value
     if (isGTINActive) {
       this.searchProductByGTIN();
-    }
-    else{
+    } else {
       this.searchProductByQuery();
     }
   }

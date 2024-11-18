@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import {Router} from "@angular/router";
-import {Observable} from "rxjs";
+import {filter, Observable, take, tap} from "rxjs";
 import {ConfigService} from "./config.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 
@@ -11,11 +11,14 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 export class AuthService {
 
   constructor(private http: HttpClient, private router: Router, private configService: ConfigService, private _snackBar: MatSnackBar) {
-    this.configService.ip$.subscribe(ip => {
+    this.configService.ip$.pipe(
+      filter(ip => !!ip),
+      take(1),
+      tap(ip => {
       if (ip) {
-        this.baseUrl = `${ip}:8080`
+        this.baseUrl = `${ip}:8080/api/v1`
       }
-    })
+    })).subscribe()
   }
 
   private baseUrl: string | undefined;

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {Observable} from "rxjs";
+import {Observable, take, tap} from "rxjs";
 import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
 import {ConfigService} from "./config.service";
@@ -10,7 +10,13 @@ import {ConfigService} from "./config.service";
 export class OlxService {
 
   constructor(private http: HttpClient, private fb: FormBuilder, private configService: ConfigService) {
-    this.configService.ip$.pipe()
+    this.configService.ip$.pipe(
+      take(1),
+      tap(ip => {
+      if (ip) {
+        this.baseUrl = `${ip}:8080/api/v1`
+      }
+    })).subscribe();
   }
 
   private baseUrl: string | undefined;

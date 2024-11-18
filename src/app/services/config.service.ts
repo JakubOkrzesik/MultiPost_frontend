@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {BehaviorSubject} from "rxjs";
+import {BehaviorSubject, of} from "rxjs";
 import {Config} from "../models/Config";
 
 @Injectable({
@@ -18,6 +18,7 @@ export class ConfigService {
       next: config => {
         this.loadGoogleApi(config.google_api_key);
         this.ipSubject.next(config.ip_address);
+        console.log(config.ip_address)
       },
       error: () => console.log("An error occured")
     })
