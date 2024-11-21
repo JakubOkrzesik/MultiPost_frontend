@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {BehaviorSubject, of} from "rxjs";
+import {BehaviorSubject, catchError, config, firstValueFrom, of, tap} from "rxjs";
 import {Config} from "../models/Config";
 
 @Injectable({
@@ -14,14 +14,16 @@ export class ConfigService {
   constructor(private http: HttpClient) {}
 
   loadConfig() {
-    this.http.get<Config>('/assets/config.json', {observe: "body", responseType: "json"}).subscribe({
-      next: config => {
+    return this.http.get<Config>('/assets/config.json', {observe: "body", responseType: "json"}).pipe(tap(config => {
         this.loadGoogleApi(config.google_api_key);
         this.ipSubject.next(config.ip_address);
         console.log(config.ip_address)
-      },
-      error: () => console.log("An error occured")
-    })
+      }),
+      catchError(err => {
+        console.log(err);
+        return of(null);
+      })
+    )
   }
 
   private loadGoogleApi(key: string) {

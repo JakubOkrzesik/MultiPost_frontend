@@ -12,7 +12,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       multi: true,
-      useFactory: provideConfigInitializer,
+      useFactory: (configService: ConfigService) => () => configService.loadConfig(),
       deps: [ConfigService]
     }]
 };

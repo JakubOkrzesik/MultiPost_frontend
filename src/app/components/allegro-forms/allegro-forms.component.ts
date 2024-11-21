@@ -167,6 +167,7 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
 
   // needs reevaluation
   private setupParamFormSubscriptions() {
+    this.deleteSubscriptions();
     this.missingParams.forEach(field => {
       const parentId = field.options.dependsOnParameterId;
       if (parentId) {
