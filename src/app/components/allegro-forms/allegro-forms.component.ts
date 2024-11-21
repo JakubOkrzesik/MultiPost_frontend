@@ -74,18 +74,18 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
   }
 
   private setupCategoryIDSubscription() {
-    return this.allegroForm.get('category')?.valueChanges.pipe(tap(categoryId => {
-        if (!this.allegroForm.controls['isGTINActive'].value && categoryId != '' && categoryId != null) {
+    this.allegroForm.get('category')?.valueChanges.pipe(filter(categoryId => !this.allegroForm.controls['isGTINActive'].value && categoryId != '' && categoryId != null),
+      tap(() => {
           this.productParameters = [];
           this.missingParams = [];
           // in order to ensure that the correct param forms are displayed also that the form stays invalid will have to do for now
-        }
       }),
       switchMap((categoryId) => this.allegroService.allegroQuerySearch(this.allegroForm.get('productQuery')?.value, categoryId).pipe(tap(response => {
-        // products labeled as "LISTED" do not require further approval from allegro and can be immediately posted
-        this.productArray = response.products.filter((product: any) => product.publication.status === "LISTED");
+        console.log(response);
+        this.productArray = response.products/*.filter((product: any) => product.publication.status === "LISTED")*/;
       }))),
       catchError((err) => {
+        console.log(err)
         this.errorService.displayErrorMessage(err);
         return of(null);
       })).subscribe({
@@ -98,7 +98,8 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
     this.allegroForm.controls['productId']?.valueChanges.pipe(filter(result => !this.allegroForm.controls['isGTINActive'].value && result != '' && result != null),
       switchMap((result) => this.allegroService.getAllegroProductbyID(result).pipe(tap(productData => {
         this.productParameters = productData.parameters;
-      }), switchMap(() => this.generateParamForms()))),
+      }),
+        switchMap(() => this.generateParamForms()))),
       catchError((err) => {
         this.errorService.displayErrorMessage(err);
         return of(null);
@@ -166,11 +167,13 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
   }
 
   // needs reevaluation
+  // does not work when a child param is not in the product and the parent is
   private setupParamFormSubscriptions() {
     this.deleteSubscriptions();
     this.missingParams.forEach(field => {
       const parentId = field.options.dependsOnParameterId;
       if (parentId) {
+        // needs to search for the parent params in the product params first
         const subscription = this.allegroForm.get('paramForms')?.get(parentId)?.valueChanges.subscribe(parentIdValue => {
           field.dictionary = this.updateDependentOptions(field, parentIdValue);
         });
