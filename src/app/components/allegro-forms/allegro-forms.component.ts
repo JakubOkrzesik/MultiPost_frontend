@@ -81,17 +81,13 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
           // in order to ensure that the correct param forms are displayed also that the form stays invalid will have to do for now
       }),
       switchMap((categoryId) => this.allegroService.allegroQuerySearch(this.allegroForm.get('productQuery')?.value, categoryId).pipe(tap(response => {
-        console.log(response);
         this.productArray = response.products/*.filter((product: any) => product.publication.status === "LISTED")*/;
       }))),
       catchError((err) => {
         console.log(err)
         this.errorService.displayErrorMessage(err);
         return of(null);
-      })).subscribe({
-        complete: () => console.log("Category selected, product list fetched")
-      }
-    )
+      })).subscribe()
   }
 
   private setupProductIDSubscription() {
@@ -102,11 +98,9 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
         switchMap(() => this.generateParamForms()))),
       catchError((err) => {
         this.errorService.displayErrorMessage(err);
+        console.log(err)
         return of(null);
-      })).subscribe({
-        complete: () => console.log("Product ID selected. Product forms fetched and retrieved")
-      }
-    )
+      })).subscribe()
   }
 
   private searchProductByGTIN() {
@@ -158,7 +152,6 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
       const [formGroup, missingParams, missingParamsMap] = this.allegroService.getAllegroMissingParams(this.requiredParamsArray, this.productParameters);
       this.allegroForm.setControl('paramForms', formGroup);
       this.missingParams = missingParams;
-      console.log(missingParams)
       this.missingParamsMap = missingParamsMap
       // copy of the original values because if the dictionary belongs to a child component it will be getting updated
       this.missingParams.forEach(field => field.originalDictionary = field.dictionary);
@@ -171,17 +164,52 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
   private setupParamFormSubscriptions() {
     this.deleteSubscriptions();
     this.missingParams.forEach(field => {
+
       const parentId = field.options.dependsOnParameterId;
-      if (parentId) {
-        // needs to search for the parent params in the product params first
-        const subscription = this.allegroForm.get('paramForms')?.get(parentId)?.valueChanges.subscribe(parentIdValue => {
-          field.dictionary = this.updateDependentOptions(field, parentIdValue);
-        });
-        if (subscription) {
-          this.subscriptions.push(subscription);
-        }
+
+      // needs to search for the parent params in the product params first
+      if (!parentId || this.searchForParentParamsInProduct(field)) {
+        return;
+      }
+
+      const subscription = this.allegroForm.get('paramForms')?.get(parentId)?.valueChanges.subscribe(parentIdValue => {
+        field.dictionary = this.updateDependentOptions(field, parentIdValue);
+      });
+
+      if (subscription) {
+        this.subscriptions.push(subscription);
       }
     });
+  }
+
+  private searchForParentParamsInProduct(field: any): boolean {
+    const parentId = field.options.dependsOnParameterId;
+
+    return this.productParameters.some(param => {
+      if (param.id === parentId) {
+
+        field.dictionary = this.updateDependentOptions(field, param.valuesIds); // Call your function here
+        return true;
+      }
+      return false;
+    });
+  }
+
+  // is responsible for updating data of the dependent form options - some form entries are dependent on parent value for example Manufacturer - Apple, product - Iphone 12
+  // this function ensures only correct child options are visible
+  // functions serves both values entered via the form and values already assigned to the product
+  private updateDependentOptions(field: any, parentIdValue: string | string[]) {
+    if (!field.originalDictionary) {
+      return [];
+    }
+
+    return field.originalDictionary.filter((dictEntry: any) => {
+      if (typeof parentIdValue == "string") {
+        return dictEntry.dependsOnValueIds.includes(parentIdValue);
+      }
+      return parentIdValue.some(value => dictEntry.dependsOnValueIds.includes(value));
+    }
+    );
   }
 
   private setupFormValidationSubscription() {
@@ -252,17 +280,6 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
     });
   }
 
-  // is responsible for updating data of the dependent form options - some form entries are dependent on parent value for example Manufacturer - Apple, product - Iphone 12
-  // this function ensures only correct child options are visible
-  private updateDependentOptions(field: any, parentIdValue: any) {
-    if (!field.originalDictionary) {
-      return [];
-    }
-
-    return field.originalDictionary.filter((dictEntry: any) =>
-      dictEntry.dependsOnValueIds.includes(parentIdValue)
-    );
-  }
 
   conditionalToolTip(): string {
     if (this.productName) {
@@ -276,7 +293,6 @@ export class AllegroFormsComponent implements OnDestroy, OnInit {
 
   private deleteSubscriptions() {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
-    console.log("subscriptions deleted");
   }
 
   formRequirementCheck(fieldId: any) {
