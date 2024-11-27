@@ -4,5 +4,5 @@ Frontend for MultiPost - an app enabling its users to post and manage multiple l
 ## Technologies used
 Angular, Google Places API, Amazon EC2
 ## Relevant links
-[App hosted on AWS](http://35.156.5.115:4200/)\
+[App hosted on AWS](http://18.195.157.173:4200/)\
 [Frontend github repo](https://github.com/JakubOkrzesik/MultiPost-backend)
